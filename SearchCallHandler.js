@@ -13,11 +13,14 @@ function checkValues() {
 	} else {
 	    setMessage("Please provide an activity name.", true);
 	}
-    } else {
-	setMessage("Hotel");
+    } else if ($("#searchType").val() == "hotel") {
+	setMessage("Hotel", false);
 	return true;
+    } else {
+	setMessage("Invalid search type provided.", true);
+	return false;
     }
-   return false;
+    return false;
 }
 
 function getResults() {
@@ -43,7 +46,9 @@ function setMessage(message, error){
     $("#messageSpan").text(message);
     $("#messageSpan").removeClass("hidden");
     
-    if (error) $("#messageSpan").addClass("errorMessage");
+    if (error) {
+	$("#messageSpan").addClass("errorMessage");
+    }
 }
 
 // Clear the message container and set proper classes.
@@ -53,24 +58,42 @@ function clearMessage() {
     $("#messageSpan").removeClass("errorMessage");  
 }
 
-function parseResponse(venues) {
-	//TODO: Parse Response splitsen in verschillende call responses
-	
-	var location, id;
-	
-	if (venues.length > 0) {
-		for (var i = 0; i < venues.length; i++) {
-			location = venues[i]['location']
-			id = setVenueMarker(venues[i]);
-			
-			createResult(venues[i]['name']);
-		}
-		
-		fitMapToMarkers();
-		$("#venueListBox").removeClass("hidden");
-	} else {
-		setMessage("No venues found.", false);
+function parseResponse(data) {
+    if ($("#searchType").val() == "place") {
+	parseVenues(data);
+    } else if ($("#searchType").val() == "activity") {
+	parseActivities(data);
+    } else if ($("#searchType").val() == "hotel") {
+	parseHotels(data);
+    } else {
+	clearResultsList();
+	setMessage("Unexpected search type error occurred.", true);
+    }
+}
+
+function parseActivities(activities) {
+    var location, id;
+}
+
+function parseHotels(hotels) {
+    // TODO
+}
+
+function parseVenues(venues) {
+    var location, id;
+    
+    if (venues.length > 0) {
+	for (var i = 0; i < venues.length; i++) {
+	    location = venues[i]['location']
+	    id = setVenueMarker(venues[i]);	    
+	    createResult(venues[i]['name']);
 	}
+		
+	fitMapToMarkers();
+	$("#venueListBox").removeClass("hidden");
+    } else {
+	setMessage("No venues found.", false);
+    }
 }
 
 // Remove all slots from the venue list and hide the list.
@@ -82,11 +105,11 @@ function clearResultsList() {
 function createResult(name) {
     var result = $('<div class="result"></div>').text(name);
     $(".resultList").append($(result)
-		.draggable({
-			        cursor: 'pointer',
-			        connectWith: '.timeline',
-			        helper: 'clone',
-			        opacity: 0.5,
-			        zIndex: 10
-			    }));
+	.draggable({
+	    cursor: 'pointer',
+	    connectWith: '.timeline',
+	    helper: 'clone',
+	    opacity: 0.5,
+	    zIndex: 10
+	}));
 }

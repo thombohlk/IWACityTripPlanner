@@ -20,7 +20,7 @@
 	} else if ($searchType == "hotel") {
 	    include("HotelCallHandler.php");
 	} else {
-	    header("HTTP/1.0 500 Invalid search type!");
+	    header("HTTP/1.0 500 Invalid search type provided.");
 	    exit();
 	}
 

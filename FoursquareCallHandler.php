@@ -50,7 +50,7 @@
 		}
 		curl_close($ch);
 		
-		// Remove unnessacery data
+		// Remove unnecessary data
 		$venues = $data->{'response'}->{'venues'};
 		foreach ($venues as $key => &$venue) {
 			unset($venue->{'canonicalUrl'});

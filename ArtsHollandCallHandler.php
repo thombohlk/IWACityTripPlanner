@@ -97,10 +97,9 @@
 
 		$info = curl_getinfo($ch);
 		$errno = curl_errno($ch);
-		var_dump($data);
 
 		if( $output === false) {
-			header("HTTP/1.0 500 Unexpected Foursquare server error.");
+			header("HTTP/1.0 500 Unexpected ArtsHolland server error.");
 			print "No output was given.";
 			exit();
 		} else if ($data != null && $data->{'meta'}->{'code'} != 200) {	
@@ -114,6 +113,6 @@
 
 		curl_close($ch);
 
-		return $data;
+		print $output;
     }
 ?>
