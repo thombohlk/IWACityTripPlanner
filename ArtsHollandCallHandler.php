@@ -33,12 +33,30 @@
 	PREFIX gr: <http://purl.org/goodrelations/v1#>
 	PREFIX gn: <http://www.geonames.org/ontology#>
 
-	SELECT DISTINCT ?Event WHERE {
+	SELECT DISTINCT ?Event ?VenueTitle ?EventTitle ?Lat ?Long ?Start ?End WHERE {
 	    ?Event a ah:Event .
 	    ?Event ah:venue ?Venue .
-	    ?Venue dc:title '$name'@nl .
-    
-	} LIMIT 100";
+	    ?Venue dc:title ?VenueTitle .
+	    FILTER ( lang(?VenueTitle) = 'nl' ) .
+	    ?Event dc:title ?EventTitle .
+	    ?Venue geo:lat ?Lat .
+	    ?Venue geo:long ?Long .
+	    ?Event time:hasBeginning ?Start .
+	    ?Event time:hasEnd ?End .
+
+	";
+
+	if ($name != '') { 
+	    $query .= "FILTER regex(str(?VenueTitle), '$name', 'i') .";
+	}
+
+	/*
+	if ($location != '') {
+	    $query .= "FILTER regex(str(?
+
+	 */
+
+	$query .= "} LIMIT 100";
 
 	$triples = sparqlQuery($query, $endpoint);
 		
