@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Foursquare venue finder</title>
+        
+        <link rel="stylesheet" href="style.css" />
+        <script type="text/javascript" src="jquery-1.7.1.min.js" ></script> 
+	<script src="http://code.jquery.com/ui/1.10.1/jquery-ui.js"></script>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.1/themes/base/jquery-ui.css" />
+        <script type="text/javascript" src="SearchCallHandler.js" ></script>
+        <script type="text/javascript" src="GoogleMaps.js" ></script>
+	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBmlvKKx2erMSAiaAveFJhG5NRmCrZOvmI&sensor=true"></script>
+	<script>$(function() { 
+	    $( "#startdatepicker" ).datepicker({
+		dateFormat: 'dd-mm-yy',
+		changeMonth: true,
+		changeYear: true
+	    },
+	    $.datepicker.regional['nl']);
+	    });</script>
+	<script>$(function() {
+	    $( "#enddatepicker" ).datepicker({
+		dateFormat: 'dd-mm-yy',
+		changeMonth: true,
+		changeYear: true
+	    },
+	    $.datepicker.regional['nl']);
+	    });</script>
+	<script>
+	    $(function () {
+		$('.result').draggable({
+		    cursor: 'pointer',
+		    connectWith: '.timeline',
+		    helper: 'clone',
+		    opacity: 0.5,
+		    zIndex: 10
+		});
+			
+		$('.timeline').sortable({
+		    connectWith: '.timeline',
+		    cursor: 'pointer'
+		}).droppable({
+		    accept: '.result',
+		    activeClass: 'highlight',
+		    drop: function(event, ui) {
+			var $li = $('<div class="timelineItem" >').html(ui.draggable.html());
+			$li.appendTo(this);
+		    }
+		});
+	    });
+	</script>
+    </head>
+    <body onload="initializeMap()">
+        <div class="contentBox" id="searchBar">
+	<h2><span class="inputHeader">Search input</span></h2>
+	    <div class="inputContent">
+		<table>
+		    <tr>
+			<td><span class="label">Search type</span></td>
+			<td><span class="label">Name</span></td>
+			<td><span class="label">Location</span></td>
+			<td><span class="label">Starting date</span></td>
+			<td><span class="label">End date</span></td>
+		    </tr>
+		    <tr>
+			<td>
+			    <select required id="searchType">
+				<option value="place">Place</option>
+				<option value="activity">Activity</option>
+				<option value="hotel">Hotel</option	>
+			    </select>
+			</td>
+			<td><input type="text" size="30" id="name" onkeydown="if (event.keyCode == 13) { getResults(); }" value=""/></td>
+			<td><input type="text" size="30" id="location" onkeydown="if (event.keyCode == 13) { getResults(); }" value=""/></td>
+			<td><input type="text" id="startdatepicker" value=""/></td>
+			<td><input type="text" id="enddatepicker" value=""/></td>
+		    </tr>
+		    <tr>
+			<td colspan=2><input type="button" value="Get venues" onclick="getResults();"/></td>
+		    </tr>
+		</table>
+		<div id="messageDiv">
+		    <span id="messageSpan" class="hidden"></span>                    
+		</div>
+	    </div>
+        </div>
+
+
+	<div class="contentBox" id="venueListBox">
+	    <h2><span class="inputHeader">Search results</span></h2>
+	    <div class="resultList">	
+	    </div>
+	</div> 
+
+
+	<div id="timelineBox">
+	    <h2><span class="inputHeader">Timeline</span></h2>
+	    <div class="timeline">
+		<div class="timelineItem" data-item="2">Item 2</div>
+		<div class="timelineItem" data-item="3">Item 3</div>
+		<div class="timelineItem" data-item="4">Item 4</div>
+	    </div>
+	</div> 
+
+
+	<div id="map_canvas"></div>
+    
+    </body>
+</html>

@@ -1,0 +1,141 @@
+/* General Layout */
+
+html {
+height: 100%;
+}
+
+body {
+font: 12px/1.7em "Arial" , sans-serif;
+color: #333;
+height: 100%;
+margin: 0;
+padding: 0;
+}
+
+.hidden {
+visibility: hidden;
+}
+
+.label {
+margin-right: 10px;
+}
+
+.contentBox {
+border: 1px solid #d2d4ea;
+background-color: #fff;
+padding: 0px 11px 11px 11px;
+-moz-border-radius: 6px;
+-webkit-border-radius: 6px;
+-khtml-border-radius: 6px;
+border-radius: 6px;
+box-shadow: 3px 3px 5px #888;
+margin: 20px;
+position: absolute;
+z-index: 1000;
+}
+
+#searchBar {
+}
+
+h2 {
+background: #fff;
+padding: 0 6px 0 0;
+}
+
+#venueListBox {
+position: absolute;
+border: 1px solid #777;	
+padding: 3px 5px;
+color: #777;
+box-shadow: 3px 3px 5px #888;
+-moz-border-radius: 6px;
+-webkit-border-radius: 6px;
+-khtml-border-radius: 6px;
+border-radius: 6px;
+max-height: 70%;
+min-width: 200px;
+min-height: 200px;
+overflow: auto;
+right: 0;
+}
+
+#venueListBox tr:hover {
+background: #777;
+color: #FFF;
+cursor: pointer;
+}
+
+.errorMessage {
+color: red;
+margin: 5px;
+}
+
+#messageDiv {
+width: 300px;
+overflow: auto;
+}
+
+#map_canvas {
+position: static;
+z-index: -1000;
+height: 100%;	
+}
+
+
+
+#timelineBox {
+background-color: #aaa;
+width: 100%;
+height: 200px;
+position: absolute;
+z-index: 1000;
+bottom: 0;
+}
+
+.resultList {
+display: block;
+width: 100%;
+height: auto;
+}
+
+.result {
+display: block;
+width: auto;
+height: auto;
+padding: 8px 15px;
+border: 1px solid #ccc;
+text-align: center;
+background: #eee;
+margin: 5px;
+-moz-border-radius: 3px;
+-webkit-border-radius: 3px;
+-khtml-border-radius: 3px;
+border-radius: 3px;
+}
+
+.timelineItem {
+display: block;
+width: 100px;
+height: 100px;
+padding: 8px 15px;
+float: left;
+margin: 5px;
+border: 1px solid #ccc;
+text-align: center;
+background: #eee;
+-moz-border-radius: 3px;
+-webkit-border-radius: 3px;
+-khtml-border-radius: 3px;
+border-radius: 3px;	
+}
+
+.timeline {
+display: inline-block;
+width: 100%;
+height: auto;
+overflow: hidden;
+}
+
+.highlight {
+background: #bbb;
+}
