@@ -73,6 +73,20 @@ function parseResponse(data) {
 
 function parseActivities(activities) {
     var location, id;
+
+	if (activities.length > 0) {
+		console.log("bla");
+		for (var i = 0; i < activities.length; i++) {
+			location = activities[i]['location']
+			id = setActivityMarker(activities[i]);	    
+			createResult(activities[i]['VenueTitle']['value']);
+		}
+		
+		fitMapToMarkers();
+		$("#venueListBox").removeClass("hidden");
+		} else {
+		setMessage("No activities found.", false);
+    }
 }
 
 function parseHotels(hotels) {

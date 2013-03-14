@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF
+	xmlns:ah="http://purl.org/artsholland/1.0/"
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+	xmlns:owl="http://www.w3.org/2002/07/owl#"
+	xmlns:dc="http://purl.org/dc/terms/"
+	xmlns:foaf="http://xmlns.com/foaf/0.1/"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+	xmlns:time="http://www.w3.org/2006/time#"
+	xmlns:geo="http://www.w3.org/2003/01/geo/wgs84_pos#"
+	xmlns:vcard="http://www.w3.org/2006/vcard/ns#"
+	xmlns:osgeo="http://rdf.opensahara.com/type/geo/"
+	xmlns:bd="http://www.bigdata.com/rdf/search#"
+	xmlns:search="http://rdf.opensahara.com/search#"
+	xmlns:fn="http://www.w3.org/2005/xpath-functions#"
+	xmlns:gr="http://purl.org/goodrelations/v1#"
+	xmlns:gn="http://www.geonames.org/ontology#"
+	xmlns:bigdata="http://www.bigdata.com/rdf#">
+
+<rdf:Description rdf:about="http://data.artsholland.com/event/2008-a-003-0028453">
+	<rdf:type rdf:resource="http://purl.org/artsholland/1.0/Event"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://data.artsholland.com/event/2008-a-003-0032092">
+	<rdf:type rdf:resource="http://purl.org/artsholland/1.0/Event"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://data.artsholland.com/event/2008-a-074-0007483">
+	<rdf:type rdf:resource="http://purl.org/artsholland/1.0/Event"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://data.artsholland.com/event/2008-a-079-0006176">
+	<rdf:type rdf:resource="http://purl.org/artsholland/1.0/Event"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://data.artsholland.com/event/2008-a-047-0143827">
+	<rdf:type rdf:resource="http://purl.org/artsholland/1.0/Event"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://data.artsholland.com/event/2008-a-003-0035168">
+	<rdf:type rdf:resource="http://purl.org/artsholland/1.0/Event"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://data.artsholland.com/event/2008-a-047-0145838">
+	<rdf:type rdf:resource="http://purl.org/artsholland/1.0/Event"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://data.artsholland.com/event/2008-a-003-0035079">
+	<rdf:type rdf:resource="http://purl.org/artsholland/1.0/Event"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://data.artsholland.com/event/2009-a-020-0000031">
+	<rdf:type rdf:resource="http://purl.org/artsholland/1.0/Event"/>
+</rdf:Description>
+
+<rdf:Description rdf:about="http://data.artsholland.com/event/2009-a-047-0148347">
+	<rdf:type rdf:resource="http://purl.org/artsholland/1.0/Event"/>
+</rdf:Description>
+
+</rdf:RDF>
