@@ -120,7 +120,7 @@ function createResult(name) {
     var result = $('<div class="result"></div>').text(name);
     $(".resultList").append($(result)
 	.draggable({
-	    cursor: 'pointer',
+	    cursor: 'move',
 	    connectWith: '.timeline',
 	    helper: 'clone',
 	    opacity: 0.5,

@@ -29,7 +29,7 @@
 	<script>
 	    $(function () {
 		$('.result').draggable({
-		    cursor: 'pointer',
+		    cursor: 'move',
 		    connectWith: '.timeline',
 		    helper: 'clone',
 		    opacity: 0.5,
@@ -38,7 +38,7 @@
 			
 		$('.timeline').sortable({
 		    connectWith: '.timeline',
-		    cursor: 'pointer'
+		    cursor: 'move'
 		}).droppable({
 		    accept: '.result',
 		    activeClass: 'highlight',
