@@ -12,17 +12,17 @@
 	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBmlvKKx2erMSAiaAveFJhG5NRmCrZOvmI&sensor=true"></script>
 	<script>$(function() { 
 	    $( "#startdatepicker" ).datepicker({
-		dateFormat: 'dd-mm-yy',
-		changeMonth: true,
-		changeYear: true
+			dateFormat: 'dd-mm-yy',
+			changeMonth: true,
+			changeYear: true
 	    },
 	    $.datepicker.regional['nl']);
 	    });</script>
 	<script>$(function() {
 	    $( "#enddatepicker" ).datepicker({
-		dateFormat: 'dd-mm-yy',
-		changeMonth: true,
-		changeYear: true
+			dateFormat: 'dd-mm-yy',
+			changeMonth: true,
+			changeYear: true
 	    },
 	    $.datepicker.regional['nl']);
 	    });</script>
@@ -38,13 +38,19 @@
 			
 		$('.timeline').sortable({
 		    connectWith: '.timeline',
-		    cursor: 'move'
+		    cursor: 'move',
+		    sort: function(event, ui) {
+				calcRoute();
+			}
 		}).droppable({
 		    accept: '.result',
 		    activeClass: 'highlight',
 		    drop: function(event, ui) {
-			var $li = $('<div class="timelineItem" >').html(ui.draggable.html());
-			$li.appendTo(this);
+				var $li = $('<div class="timelineItem" >').html(ui.draggable.html());
+				$li.attr('id', ui.draggable.prop('id'));
+				$li.appendTo(this);
+				moveItemToTimelineList(ui.draggable.prop('id'));
+				calcRoute();
 		    }
 		});
 	    });
@@ -70,8 +76,8 @@
 				<option value="hotel">Hotel</option	>
 			    </select>
 			</td>
-			<td><input type="text" size="30" id="name" onkeydown="if (event.keyCode == 13) { getResults(); }" value=""/></td>
-			<td><input type="text" size="30" id="location" onkeydown="if (event.keyCode == 13) { getResults(); }" value=""/></td>
+			<td><input type="text" size="30" id="name" onkeydown="if (event.keyCode == 13) { getResults(); }" value="bla"/></td>
+			<td><input type="text" size="30" id="location" onkeydown="if (event.keyCode == 13) { getResults(); }" value="amsterdam"/></td>
 			<td><input type="text" id="startdatepicker" value=""/></td>
 			<td><input type="text" id="enddatepicker" value=""/></td>
 		    </tr>
@@ -96,9 +102,6 @@
 	<div id="timelineBox">
 	    <h2><span class="inputHeader">Timeline</span></h2>
 	    <div class="timeline">
-		<div class="timelineItem" data-item="2">Item 2</div>
-		<div class="timelineItem" data-item="3">Item 3</div>
-		<div class="timelineItem" data-item="4">Item 4</div>
 	    </div>
 	</div> 
 

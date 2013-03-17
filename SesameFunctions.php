@@ -1,9 +1,9 @@
 <?php
-	function postData($triples) {
+	function postData($triples, $format="application/xml") {
 	
 		// Create the url 
 		$url = "http://77.250.167.72:8080/openrdf-sesame/repositories/CityTripPlanner/statements";
-		$header[0] = "Content-Type: application/xml;charset=utf-8"; 
+		$header[0] = "Content-Type: ".$format.";charset=utf-8"; 
 	
 		//set the url, number of POST vars, POST data
 		$ch = curl_init();

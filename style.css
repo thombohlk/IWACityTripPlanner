@@ -81,8 +81,6 @@ z-index: -1000;
 height: 100%;	
 }
 
-
-
 #timelineBox {
 background-color: #aaa;
 width: 100%;
@@ -132,8 +130,13 @@ border-radius: 3px;
 .timeline {
 display: inline-block;
 width: 100%;
-height: auto;
+min-height: 120px;
+height: 100px;
 overflow: hidden;
+}
+
+.highlightedResult {
+background: #00ccff;
 }
 
 .highlight {

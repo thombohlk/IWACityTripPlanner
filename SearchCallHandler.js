@@ -1,4 +1,5 @@
-// Clear everything and get list of venues. If it succeeds parse venues, otherwise give an error.
+var resultList = [];
+var timelineList = [];
 
 function checkValues() {
     if ($("#searchType").val() == "place") {
@@ -72,41 +73,55 @@ function parseResponse(data) {
 }
 
 function parseActivities(activities) {
-    var location, id;
+    var id;
 
 	if (activities.length > 0) {
-		console.log("bla");
 		for (var i = 0; i < activities.length; i++) {
-			location = activities[i]['location']
 			id = setActivityMarker(activities[i]);	    
 			createResult(activities[i]['VenueTitle']['value']);
 		}
 		
 		fitMapToMarkers();
 		$("#venueListBox").removeClass("hidden");
-		} else {
+		
+		resultList.push(activities[i]);
+	} else {
 		setMessage("No activities found.", false);
     }
 }
 
 function parseHotels(hotels) {
-    // TODO
+    var id;
+
+	if (hotels.length > 0) {
+		for (var i = 0; i < hotels.length; i++) {
+			id = setHotelMarker(hotels[i]);	    
+			createResult(hotels[i]['Title']['value']);
+		}
+		
+		fitMapToMarkers();
+		$("#venueListBox").removeClass("hidden");
+	} else {
+		setMessage("No hotels found.", false);
+    }
 }
 
 function parseVenues(venues) {
     var location, id;
     
-    if (venues.length > 0) {
-	for (var i = 0; i < venues.length; i++) {
-	    location = venues[i]['location']
-	    id = setVenueMarker(venues[i]);	    
-	    createResult(venues[i]['name']);
-	}
+	if (venues.length > 0) {
+		for (var i = 0; i < venues.length; i++) {
+			location = venues[i]['location']
+			id = setVenueMarker(venues[i]);	    
+			createResult(venues[i]['name'], id);
 		
-	fitMapToMarkers();
-	$("#venueListBox").removeClass("hidden");
+			resultList.push(venues[i]);
+		}
+			
+		fitMapToMarkers();
+		$("#venueListBox").removeClass("hidden");
     } else {
-	setMessage("No venues found.", false);
+		setMessage("No venues found.", false);
     }
 }
 
@@ -114,10 +129,18 @@ function parseVenues(venues) {
 function clearResultsList() {
     $("div.result").remove();
     $("#venueListBox").addClass("hidden");
+    resultList = [];
 }
 
-function createResult(name) {
-    var result = $('<div class="result"></div>').text(name);
+// Clear any highlighted results and highlight the result with ID
+function highlightResult(id) {
+	$("div.result").removeClass("highlightedResult");
+	$("#"+id).addClass("highlightedResult");
+}
+
+function createResult(name, id) {
+    var test = '<div class="result" id=\''+id+'\' onmouseover="highlightMarker(\''+id+'\');" onclick="focusOnMarker(\''+id+'\');"></div>';
+    var result = $(test).text(name);
     $(".resultList").append($(result)
 	.draggable({
 	    cursor: 'move',
@@ -126,4 +149,13 @@ function createResult(name) {
 	    opacity: 0.5,
 	    zIndex: 10
 	}));
+}
+
+
+function moveItemToTimelineList(id) {
+	for (var i = 0; i < resultList.length; i++) {
+		if (id == resultList[i]['id']) {
+			timelineList.push(resultList[i]);
+		}
+	}
 }

@@ -16,12 +16,12 @@
 
 	// Create the url 
         $url = 'https://api.foursquare.com/v2/venues/search?'.http_build_query(array(
-	    'near' => $location,
-	    'query' => $name,
-	    'client_id' => 'PDIS2NTFLWTMYOVHUA3T2FKDEXXJ00FRTBH0H1SZPOASX5OI',
-	    'client_secret' => 'RVTQNR1PO4H0GMSGCAAHVYFRYAM2PMQHASXWSXZWSXWCLFIL',
-	    'v' => '20130219',
-	));
+			'near' => $location,
+			'query' => $name,
+			'client_id' => 'PDIS2NTFLWTMYOVHUA3T2FKDEXXJ00FRTBH0H1SZPOASX5OI',
+			'client_secret' => 'RVTQNR1PO4H0GMSGCAAHVYFRYAM2PMQHASXWSXZWSXWCLFIL',
+			'v' => '20130219',
+		));
 
         // Perform curl command
 		$ch = curl_init();
@@ -71,9 +71,7 @@
     catch (Exception $e)
     {
         header("HTTP/1.0 500 Unexpected server error.");
-		
 		print $e->getMessage();
-
-        exit();
+		exit();
     }
 ?>
