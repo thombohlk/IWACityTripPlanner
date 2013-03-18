@@ -1,10 +1,15 @@
 <?php
 	// Include files
 	include("SesameFunctions.php");
-	include("query.php");
+	include("Queries.php");
 	
 	//Get the variables needed for the ArtsHolland call and check if they are filled
 	$location = $_GET['location'];
+	$startDate = $_GET['startDate'];
+	$endDate = $_GET['endDate'];
+	
+	$startDate = date("m/d/Y", strtotime($startDate));
+	$endDate = date("m/d/Y", strtotime($endDate));
 
 	$hotelList = getHotelList($location);
 	$rdfData = parseJSONtoRDF($hotelList);
@@ -35,8 +40,8 @@
 			'destinationString' => $city,
 			'countryCode' => 'NL',
 			'supplierCacheTolerance' => 'MED',
-			'arrivalDate' => '03/20/2013',
-			'departureDate' => '03/21/2013',
+			'arrivalDate' => $startDate,
+			'departureDate' => $endDate,
 			'room1' => '1,3',
 			'room2' => '1,5',
 			'numberOfResults' => '100',
@@ -68,8 +73,8 @@
 		
 		$data = json_decode($output);
 		$hotelList = $data->{'HotelListResponse'}->{'HotelList'}->{'HotelSummary'};
-		
-		//var_dump(json_encode($data)); exit();
+//		print $hotelList; exit();
+//		var_dump(json_encode($hotelList)); exit();
 		
 		return $hotelList;
 	}
@@ -77,7 +82,7 @@
 	function parseJSONtoRDF($hotelList) {
 		$output = '';
 		
-		$output.= "@prefix iwa: <http://example.com/iwa/> . ";
+		$output.= "@prefix iwa: <http://example.org/iwa/> . ";
 		$output.= "@prefix dc: <http://purl.org/dc/terms/> . ";
 		$output.= "@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> . ";
 		
@@ -87,7 +92,8 @@
 			$output.= "dc:title \"".$hotel->{'name'}."\"@nl ; ";
 			$output.= "geo:lat \"".$hotel->{'latitude'}."\" ; ";
 			$output.= "geo:long \"".$hotel->{'longitude'}."\" ; ";
-			$output.= "geo:city \"".$hotel->{'city'}."\" . ";
+			$output.= "geo:city \"".$hotel->{'city'}."\" ; ";
+			$output.= "iwa:id \"".$hotel->{'hotelId'}."\" . ";
 		}
 		
 		return $output;

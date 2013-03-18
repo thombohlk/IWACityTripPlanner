@@ -1,7 +1,7 @@
 <?php
 	// Include files
 	include("SesameFunctions.php");
-	include("query.php");
+	include("Queries.php");
 
     // Define global variables for ArtsHolland call
     $api_key = '9cbce178ed121b61a0797500d62cd440';
@@ -18,21 +18,19 @@
 			exit();
 		}
 
-		// Create query
+		// Create ArtsHolland query, assert results into Sesame
 		$query = makeArtsHollandConstruct($name);
-	
-		$triples = sparqlQuery($query, $endpoint);
-		
+		$triples = executeQuery($query, $endpoint);
 		postData($triples);
-		$sesamequery = makeArtsHollandQuery($name);
 
+		// Query Sesame 
+		$sesamequery = makeArtsHollandQuery($name);
 		$json = json_decode(getRDFData($sesamequery));
-		
 		$result = $json->{'results'}->{'bindings'};
-		//var_dump($json);
-		print json_encode($result);
+
 		// Return data as JSON object
-		//print $triples;
+		print json_encode($result);
+		
     }
     catch (Exception $e)
     {
@@ -41,7 +39,7 @@
         exit();
     }
 
-	function sparqlQuery($query, $baseURL) {
+	function executeQuery($query, $baseURL) {
 		global $api_key;
 		$params=array(
 			"query" =>  $query,
@@ -79,8 +77,5 @@
 
 		curl_close($ch);
 		return $output;
-		//print "bla1\n";
-
-		//var_dump($data);
 	}
 ?>

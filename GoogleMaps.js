@@ -11,8 +11,8 @@ function initializeMap() {
 	directionsService = new google.maps.DirectionsService();
 	directionsDisplay = new google.maps.DirectionsRenderer();
     var mapOptions = {
-	center: new google.maps.LatLng(0, 0),
-	zoom: 2,
+	center: new google.maps.LatLng(52.237892,5.349426),
+	zoom: 7,
 	mapTypeId: google.maps.MapTypeId.ROADMAP,
 	panControl: false,
 	zoomControl: false,
@@ -25,8 +25,8 @@ function initializeMap() {
     map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
 
     google.maps.event.addListener(map, 'tilesloaded', function(){
-	document.getElementById("map_canvas").zIndex = -1000;
-	document.getElementById("map_canvas").style.position = "static";
+		document.getElementById("map_canvas").zIndex = -1000;
+		document.getElementById("map_canvas").style.position = "static";
     });
 	
     pinImage = new google.maps.MarkerImage("http://maps.google.com/intl/en_us/mapfiles/ms/micons/red.png", null, null, null, new google.maps.Size(32, 32))
@@ -37,19 +37,19 @@ function initializeMap() {
 
 // Set a marker for a venue and return the id.
 function setVenueMarker(venue) {
-    var positionMarker = new google.maps.LatLng(venue['location']['lat'], venue['location']['lng']);
+    var positionMarker = new google.maps.LatLng(venue['lat']['value'], venue['lng']['value']);
     var marker = new google.maps.Marker({
 	position: positionMarker,
 	map: map,
 	icon: pinImage,
-	title: venue['name']
+	title: venue['VenueTitle']['value']
     });
 
-    var id = venue['id'];
-    var text = "<b>" + venue['name'] + "</b>" + 
-	"<br />Address: " + venue['location']['address'] +
-	"<br />Postal Code: " + venue['location']['postalCode'] +
-	"<br />City: " + venue['location']['city'];
+    var id = venue['id']['value'];
+    var text = "<b>" + venue['VenueTitle']['value'] + "</b>" + 
+	"<br />Address: " + venue['Address']['value'] +
+	"<br />Postal Code: " + venue['PostalCode']['value'] +
+	"<br />City: " + venue['City']['value'];
 
     marker.set("id", id);
     makeInfoWindowEvent(map, infowindow, text, marker);
@@ -83,9 +83,7 @@ function setActivityMarker(activity) {
 
 // Set a marker for a activity and return the id.
 function setHotelMarker(hotel) {
-    console.log(hotel['Long']['value']);
-    console.log(hotel['Lat']['value']);
-    var positionMarker = new google.maps.LatLng(hotel['Lat']['value'], hotel['Long']['value']);
+    var positionMarker = new google.maps.LatLng(hotel['lat']['value'], hotel['lng']['value']);
     var marker = new google.maps.Marker({
 	position: positionMarker,
 	map: map,
@@ -94,7 +92,7 @@ function setHotelMarker(hotel) {
     });
 
     //TODO: Add id
-    var id = hotel[1];
+    var id = hotel['id']['value'];
     var text = "<b>" + hotel['Title']['value'] + "</b>";
 
     marker.set("id", id);
@@ -175,16 +173,14 @@ function calcRoute() {
 	
 	for (var i = 1; i < timelineList.length-1; i++) {
 		waypts.push({
-			location: new google.maps.LatLng(timelineList[i]['location']['lat'], timelineList[i]['location']['lng']),
+			location: new google.maps.LatLng(timelineList[i]['lat']['value'], timelineList[i]['lng']['value']),
 			stopover: true
 		});
 	}
 	
 	if (timelineList.length >= 2) {
-		var start = new google.maps.LatLng(timelineList[0]['location']['lat'], timelineList[0]['location']['lng']);
-		var end = new google.maps.LatLng(timelineList[timelineList.length-1]['location']['lat'], timelineList[timelineList.length-1]['location']['lng']);
-		console.log(start);
-		console.log(end);
+		var start = new google.maps.LatLng(timelineList[0]['lat']['value'], timelineList[0]['lng']['value']);
+		var end = new google.maps.LatLng(timelineList[timelineList.length-1]['lat']['value'], timelineList[timelineList.length-1]['lng']['value']);
 		var request = {
 			origin:start,
 			destination:end,
