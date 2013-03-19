@@ -8,16 +8,16 @@ function makeVenueQuery($name, $location) {
 	PREFIX dc: <http://purl.org/dc/terms/>
 	PREFIX fs: <https://api.foursquare.com/v2/venues/>
 
-	SELECT DISTINCT ?id ?VenueTitle ?lat ?lng ?Address ?PostalCode ?City WHERE {
+	SELECT DISTINCT ?id ?title ?lat ?lng ?address ?postalCode ?city WHERE {
 	    ?id rdf:type iwa:Place .
-	    ?id dc:title ?VenueTitle .
+	    ?id dc:title ?title .
 	    ?id geo:lat ?lat .
 	    ?id geo:long ?lng .
-	    ?id iwa:PostalCode ?PostalCode .
-	    ?id iwa:Address ?Address .
-	    ?id geo:city ?City .
-	    FILTER ( lang(?VenueTitle) = 'nl' ) .
-	    FILTER regex(?VenueTitle, '$name', 'i' ) .
+	    ?id iwa:PostalCode ?postalCode .
+	    ?id iwa:Address ?address .
+	    ?id geo:city ?city .
+	    FILTER ( lang(?title) = 'nl' ) .
+	    FILTER regex(?title, '$name', 'i' ) .
 
 	} LIMIT 100
 	";
@@ -27,10 +27,11 @@ function makeVenueQuery($name, $location) {
 	return $query;
 }
 
-function makeArtsHollandQuery($name) {
+function makeArtsHollandQuery($name, $activityType) {
 	// Create query
 	$query = "
 		PREFIX ah: <http://purl.org/artsholland/1.0/>
+		PREFIX iwa:<http://example.org/iwa/>
 		PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 		PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 		PREFIX owl: <http://www.w3.org/2002/07/owl#>
@@ -47,21 +48,26 @@ function makeArtsHollandQuery($name) {
 		PREFIX gr: <http://purl.org/goodrelations/v1#>
 		PREFIX gn: <http://www.geonames.org/ontology#>
 
-		SELECT DISTINCT ?Event ?VenueTitle ?EventTitle ?Lat ?Long ?Start ?End WHERE {
-			?Event a ah:Event .
-			?Event ah:venue ?Venue .
-			?Venue dc:title ?VenueTitle .
-			FILTER ( lang(?VenueTitle) = 'nl' ) .
-			?Event dc:title ?EventTitle .
-			?Venue geo:lat ?Lat .
-			?Venue geo:long ?Long .
-			?Event time:hasBeginning ?Start .
-			?Event time:hasEnd ?End .
+		SELECT DISTINCT ?event ?title ?eventTitle ?lat ?lng ?start ?end ?id WHERE {
+			?event a ah:Event .
+			?event ah:venue ?venue .
+			?event time:hasBeginning ?start .
+			?event time:hasEnd ?end .
+			?event dc:title ?eventTitle .
+			?event iwa:id ?id . 
+			?venue dc:title ?title .
+			FILTER ( lang(?title) = 'nl' ) .
+			?venue geo:lat ?lat .
+			?venue geo:long ?lng .
 
 		";
 
-	if ($name != '') { 
-		$query .= "FILTER regex(str(?VenueTitle), '$name', 'i') .";
+	if ($name != "") { 
+		$query.= "FILTER regex(str(?title), '$name', 'i') .";
+	}
+
+	if ($activityType != "NoPref") {
+		$query.= "?event iwa:eventType ah:VenueType".$activityType." . ";
 	}
 
 	/*
@@ -70,7 +76,7 @@ function makeArtsHollandQuery($name) {
 	 */
 
 	$query .= "} LIMIT 100";
-
+	//print $query; exit();
 	return $query;
 }
 
@@ -93,31 +99,36 @@ function makeArtsHollandConstruct($name) {
 		PREFIX fn: <http://www.w3.org/2005/xpath-functions#>
 		PREFIX gr: <http://purl.org/goodrelations/v1#>
 		PREFIX gn: <http://www.geonames.org/ontology#>
+		PREFIX iwa:<http://example.org/iwa/>
 
 		CONSTRUCT {
 			?Event a ah:Event .
 			?Event ah:venue ?Venue .
-			?Venue dc:title ?VenueTitle .
 			?Event dc:title ?EventTitle .
+			?Event time:hasBeginning ?Start .
+			?Event iwa:id ?Event . 
+			?Event time:hasEnd ?End .
+			?Venue dc:title ?title .
 			?Venue geo:lat ?Lat .
 			?Venue geo:long ?Long .
-			?Event time:hasBeginning ?Start .
-			?Event time:hasEnd ?End .
+			?Venue ah:venueType ?VenueType .
+			?Venue foaf:homepage ?Homepage . 
 		} WHERE {
 			?Event a ah:Event .
 			?Event ah:venue ?Venue .
-			?Venue dc:title ?VenueTitle .
-			FILTER ( lang(?VenueTitle) = 'nl' ) .
+			?Venue dc:title ?title .
+			FILTER ( lang(?title) = 'nl' ) .
 			?Event dc:title ?EventTitle .
 			?Venue geo:lat ?Lat .
 			?Venue geo:long ?Long .
 			?Event time:hasBeginning ?Start .
 			?Event time:hasEnd ?End .
-
+			?Venue ah:venueType ?VenueType .
+			?Venue foaf:homepage ?Homepage . 
 		";
 
 	if ($name != '') { 
-		$query .= "FILTER regex(str(?VenueTitle), '$name', 'i') .";
+		$query .= "FILTER regex(str(?title), '$name', 'i') .";
 	}
 
 	/*
@@ -153,18 +164,18 @@ function makeHotelQuery($location) {
 		PREFIX bd:<http://www.bigdata.com/rdf/search#>
 		PREFIX bigdata:<http://www.bigdata.com/rdf#>
 
-		SELECT ?Hotel ?Title ?lat ?lng ?City ?id WHERE {
-			?Hotel a iwa:Hotel .
-			?Hotel dc:title ?Title .
-			?Hotel geo:lat ?lat .
-			?Hotel geo:long ?lng .
-			?Hotel geo:city ?City .
-			?Hotel iwa:id ?id .
+		SELECT ?hotel ?title ?lat ?lng ?city ?id WHERE {
+			?hotel a iwa:Hotel .
+			?hotel dc:title ?title .
+			?hotel geo:lat ?lat .
+			?hotel geo:long ?lng .
+			?hotel geo:city ?city .
+			?hotel iwa:id ?id .
 
 		";
 
 	if ($name != '') { 
-		$query .= "FILTER regex(str(?City), '$location', 'i') .";
+		$query .= "FILTER regex(str(?city), '$location', 'i') .";
 	}
 
 	/*
@@ -174,6 +185,45 @@ function makeHotelQuery($location) {
 
 	$query .= "} LIMIT 100";
 
+	return $query;
+}
+
+function makeSearchActivityQuery($id) {
+	// Create query
+	$query = "
+		PREFIX ah: <http://purl.org/artsholland/1.0/>
+		PREFIX iwa:<http://example.org/iwa/>
+		PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+		PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+		PREFIX owl: <http://www.w3.org/2002/07/owl#>
+		PREFIX dc: <http://purl.org/dc/terms/>
+		PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+		PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+		PREFIX time: <http://www.w3.org/2006/time#>
+		PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
+		PREFIX vcard: <http://www.w3.org/2006/vcard/ns#>
+		PREFIX osgeo: <http://rdf.opensahara.com/type/geo/>
+		PREFIX bd: <http://www.bigdata.com/rdf/search#>
+		PREFIX search: <http://rdf.opensahara.com/search#>
+		PREFIX fn: <http://www.w3.org/2005/xpath-functions#>
+		PREFIX gr: <http://purl.org/goodrelations/v1#>
+		PREFIX gn: <http://www.geonames.org/ontology#>
+
+		SELECT DISTINCT ?event ?title ?eventTitle ?lat ?lng ?start ?end ?id WHERE {
+			<$id> rdf:type iwa:Place .
+			?event a ah:Event .
+			?event ah:venue <$id> .
+			?event time:hasBeginning ?start .
+			?event time:hasEnd ?end .
+			?event dc:title ?eventTitle .
+			?event iwa:id ?id . 
+			<$id> dc:title ?title .
+			FILTER ( lang(?title) = 'nl' ) .
+			<$id> geo:lat ?lat .
+			<$id> geo:long ?lng .
+		} LIMIT 100";
+		
+	//print $query; exit();
 	return $query;
 }
 

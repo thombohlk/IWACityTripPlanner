@@ -12,32 +12,48 @@
 	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBmlvKKx2erMSAiaAveFJhG5NRmCrZOvmI&sensor=true"></script>
 	<script type="text/javascript" src="HelperFunctions.js" ></script>
     </head>
-    <body onload="initializeMap(); scaleWindow();">
+    <body onload="initializeMap(); scaleWindow(); updateInputFields();">
         <div class="contentBox" id="searchBar">
 			<h2><span class="inputHeader">Search input</span></h2>
 			<div class="inputContent">
 				<table>
 					<tr>
 					<td><span class="label">Search for:</span></td>
-					<td><span class="label">Name</span></td>
-					<td><span class="label">Location</span></td>
-					<td><span class="label">Starting date</span></td>
-					<td><span class="label">End date</span></td>
+					<td><span class="label placeClass activityClass hotelClass">Name</span></td>
+					<td><span class="label placeClass activityClass hotelClass">Location</span></td>
+					<td><span class="label activityClass hotelClass">Starting date</span></td>
+					<td><span class="label activityClass hotelClass">End date</span></td>
 					</tr>
 					<tr>
 					<td>
-						<select required id="searchType" onselect="updateInputFields()">
+						<select required id="searchType" onchange="updateInputFields();">
 						<option value="place">Place</option>
 						<option value="activity">Activity</option>
 						<option value="hotel">Hotel</option>
 						</select>
 					</td>
-					<td><input class="placeClass activityClass hotelClass" type="text" size="30" id="name" onkeydown="if (event.keyCode == 13) { getResults(); }" value="bla"/></td>
+					<td><input class="placeClass activityClass hotelClass" type="text" size="30" id="name" onkeydown="if (event.keyCode == 13) { getResults(); }" value="koffie"/></td>
 					<td><input class="placeClass activityClass hotelClass" type="text" size="30" id="location" onkeydown="if (event.keyCode == 13) { getResults(); }" value="amsterdam"/></td>
 					<td><input class="activityClass hotelClass" type="text" id="startdatepicker" value=""/></td>
 					<td><input class="activityClass hotelClass" type="text" id="enddatepicker" value=""/></td>
 					</tr>
 					<tr>
+					<td></td>
+					<td>
+						<select class="activityClass" id="activityType">
+							<option value="NoPref">Geen voorkeur</option>
+							<option value="Outdoorlocation">Buitenactiviteit</option>
+							<option value="Theater">Theater</option>
+							<option value="Museum">Museum</option>
+							<option value="Gallery">Galerie</option>
+							<option value="Cinema">Film</option>
+							<option value="Architecture">Architectuur</option>
+							<option value="Landmark">Bekend punt</option>
+							<option value="Dance">Dans</option>
+							<option value="Hotel">Hotel</option>
+							<option value="Music">Muziek</option>
+						</select>
+					</td>
 					<td colspan=2><input type="button" value="Get venues" onclick="getResults();"/></td>
 					</tr>
 				</table>

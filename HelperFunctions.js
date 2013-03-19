@@ -2,19 +2,19 @@ function updateInputFields() {
 	var searchType = $( "#searchType" ).val();
 
 	if (searchType == "place" ) {
-		$( "#hotelClass").addClass("hidden");
-		$( "#activityClass").addClass("hidden");
-		$( "#placeClass").removeClass("hidden");
+		$( ".hotelClass").addClass("hidden");
+		$( ".activityClass").addClass("hidden");
+		$( ".placeClass").removeClass("hidden");
 	} else if (searchType == "activity") {
-		$( "#hotelClass").addClass("hidden");
-		$( "#placeClass").addClass("hidden");
-		$( "#activityClass").removeClass("hidden");
+		$( ".hotelClass").addClass("hidden");
+		$( ".placeClass").addClass("hidden");
+		$( ".activityClass").removeClass("hidden");
 	} else if (searchType == "hotel") {
-		$( "#activityClass").addClass("hidden");
-		$( "#placeClass").addClass("hidden");
-		$( "#hotelClass").removeClass("hidden");
+		$( ".activityClass").addClass("hidden");
+		$( ".placeClass").addClass("hidden");
+		$( ".hotelClass").removeClass("hidden");
 	} else {
-		console.log("error in search type");
+		console.log("Error in search type! HelperFunctions.js, line 17");
 	}
 }
 
@@ -60,7 +60,7 @@ $(function () {
 			calcRoute();
 		}
 	}).droppable({
-		accept: '.result',
+		accept: '.result .activityInResult',
 		activeClass: 'highlight',
 		drop: function(event, ui) {
 			var $li = $('<div class="timelineItem" >').html(ui.draggable.html());

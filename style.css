@@ -12,8 +12,12 @@ margin: 0;
 padding: 0;
 }
 
+.inputHeader {
+}
+
 .hidden {
 visibility: hidden;
+display: none;
 }
 
 .label {
@@ -108,6 +112,50 @@ margin: 5px;
 -webkit-border-radius: 3px;
 -khtml-border-radius: 3px;
 border-radius: 3px;
+cursor:move;
+}
+
+.activityInResult {
+display: block;
+width: auto;
+height: auto;
+padding: 8px 12px;
+border: 1px solid #ccc;
+text-align: center;
+background: #ccc;
+margin: 5px;
+-moz-border-radius: 3px;
+-webkit-border-radius: 3px;
+-khtml-border-radius: 3px;
+border-radius: 3px;
+cursor:move;
+}
+
+.resultItemTitle {
+    font-weight: bold;
+    white-space: normal;
+}
+
+.resultItemButton {
+margin: 2px;
+display: inline-block;
+float: right;
+height: 16px;
+width: 16px;
+background: rgba( 255, 255, 255, .8 ) 
+	url('images/searchIcon.gif') 
+	50% 50% 
+	no-repeat;
+-moz-border-radius: 3px;
+-webkit-border-radius: 3px;
+-khtml-border-radius: 3px;
+border-radius: 3px;
+border: 1px solid #d2d4ea;
+}
+
+.resultItemButton:hover {
+border: 2px solid #d2d4ea;
+cursor:pointer;
 }
 
 .timelineItem {
@@ -149,45 +197,46 @@ background: #fff;
 
 /* Loading animation */
 .modal {
-    display:    none;
-    position:   fixed;
-    z-index:    1000;
-    top:        0;
-    left:       0;
-    height:     100%;
-    width:      100%;
-    background: rgba( 255, 255, 255, .8 ) 
-                url('http://i.stack.imgur.com/FhHRx.gif') 
-                50% 50% 
-                no-repeat;
+display:    none;
+position:   fixed;
+z-index:    1000;
+top:        0;
+left:       0;
+height:     100%;
+width:      100%;
+background: rgba( 255, 255, 255, .8 ) 
+	url('http://i.stack.imgur.com/FhHRx.gif') 
+	50% 50% 
+	no-repeat;
 }
 body.loading {
-    overflow: hidden;   
+overflow: hidden;   
 }
 body.loading .modal {
-    display: block;
+display: block;
 }
 
 #trashcan {
-	margin: 5px;
-	display: inline-block;
-	float: right;
-	height: 32px;
-	width: 32px;
-    background: rgba( 255, 255, 255, .8 ) 
-                url('images/trashcanIcon.png') 
-                50% 50% 
-                no-repeat;
-
+margin: 5px;
+display: inline-block;
+float: right;
+height: 32px;
+width: 32px;
+background: rgba( 255, 255, 255, .8 ) 
+	url('images/trashcanIcon.png') 
+	50% 50% 
+	no-repeat;
 -moz-border-radius: 3px;
 -webkit-border-radius: 3px;
 -khtml-border-radius: 3px;
-border-radius: 3px;	
+border-radius: 3px;
+border: 1px solid #d2d4ea;
 }
 
 #timelineTitle {
-margin: 5px
-font-size: 32px;
+margin: 10px;
+font-weight: bold;
+font-size: 24px;
 display: inline-block;
 float: left;
 }

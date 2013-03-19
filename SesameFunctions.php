@@ -23,7 +23,7 @@
 			exit();
 		} else if ($info['http_code'] != 204) {
 			header("HTTP/1.0 ".$info['http_code']." ".$errno);
-			print "Error http: ".$info['http_code'].", curl error: ".$errno."\n";
+			print "Postdata error http: ".$info['http_code'].", curl error: ".$errno."\n";
 			exit();
 		}
 
@@ -63,7 +63,8 @@
 			exit();
 		} else if ($info['http_code'] != 200) {
 			header("HTTP/1.0 ".$info['http_code']." ".$errno);
-			print "Error http: ".$info['http_code'].", curl error: ".$errno."\n";
+			print "Get RDF data error http: ".$info['http_code'].", curl error: ".$errno."\n";
+			print $query;
 			exit();
 		}
 

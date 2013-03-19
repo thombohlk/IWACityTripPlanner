@@ -12,19 +12,21 @@
     {
 		//Get the variables needed for the ArtsHolland call and check if they are filled
 		$name = $_GET['name'];
-		
-		if ($name == '') {
-			header("HTTP/1.0 500 Name is not provided.");
+		$activityType = $_GET['activityType'];
+
+		if ($activityType == '') {
+			header("HTTP/1.0 500 ArtsHollandCallhandler.php: activityType not specified.");
 			exit();
 		}
 
 		// Create ArtsHolland query, assert results into Sesame
 		$query = makeArtsHollandConstruct($name);
+		
 		$triples = executeQuery($query, $endpoint);
 		postData($triples);
 
 		// Query Sesame 
-		$sesamequery = makeArtsHollandQuery($name);
+		$sesamequery = makeArtsHollandQuery($name, $activityType);
 		$json = json_decode(getRDFData($sesamequery));
 		$result = $json->{'results'}->{'bindings'};
 
@@ -72,6 +74,7 @@
 		} else if ($info['http_code'] != 200) {
 			header("HTTP/1.0 ".$info['http_code']." ".$errno);
 			print "Error http: ".$info['http_code'].", curl error: ".$errno."\n";
+
 			exit();
 		}	
 

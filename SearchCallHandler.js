@@ -3,23 +3,23 @@ var timelineList = [];
 
 function checkValues() {
     if ($("#searchType").val() == "place") {
-	if ($("#name").val().length != 0 && $("#location").val().length != 0) {
-	    return true;
-	} else {
-	    setMessage("Please provide both name and location.", true);
-	}
+		if ($("#name").val().length != 0 && $("#location").val().length != 0) {
+			return true;
+		} else {
+			setMessage("Please provide both name and location.", true);
+		}
     } else if ($("#searchType").val() == "activity") {
-	if ($("#name").val().length != 0) { 
-	    return true;
-	} else {
-	    setMessage("Please provide an activity name.", true);
-	}
+		if ($("#location").val().length != 0) { 
+			return true;
+		} else {
+			setMessage("Please provide an activity name.", true);
+		}
     } else if ($("#searchType").val() == "hotel") {
-	setMessage("Hotel", false);
-	return true;
+		setMessage("Hotel", false);
+		return true;
     } else {	
-	setMessage("Invalid search type provided.", true);
-	return false;
+		setMessage("Invalid search type provided.", true);
+		return false;
     }
     return false;
 }
@@ -36,7 +36,8 @@ function getResults() {
 			"location": $("#location").val(),
 			"name": $("#name").val(),
 			"startDate": $("#startdatepicker").val(),
-			"endDate": $("#enddatepicker").val()
+			"endDate": $("#enddatepicker").val(),
+			"activityType": $("#activityType").val()
 			})
             .success( function(data) {
                 parseResponse(data);
@@ -49,6 +50,25 @@ function getResults() {
     } else {
         clearResultsList();
     }
+}
+
+function searchActivities(id) {
+    clearMessage();
+    //clearResultsList();
+    clearMapMarkers();
+    
+	$("body").addClass("loading");
+	$.getJSON('SearchActivityHandler.php', {
+			"id": id
+		})
+		.success( function(data) {
+			parseActivities(data);
+			$("body").removeClass("loading");
+		})
+		.error( function(error) {
+			setMessage(error.statusText, true);
+			$("body").removeClass("loading");
+		});
 }
 
 // Set the given message. If error is true, set the errorMessage class.
@@ -70,67 +90,59 @@ function clearMessage() {
 
 function parseResponse(data) {
     if ($("#searchType").val() == "place") {
-	parseVenues(data);
+		parseVenues(data);
     } else if ($("#searchType").val() == "activity") {
-	parseActivities(data);
+		parseActivities(data);
     } else if ($("#searchType").val() == "hotel") {
-	parseHotels(data);
+		parseHotels(data);
     } else {
-	clearResultsList();
-	setMessage("Unexpected search type error occurred.", true);
+		clearResultsList();
+		setMessage("Unexpected search type error occurred.", true);
     }
 }
 
 function parseActivities(activities) {
-    var id;
-
 	if (activities.length > 0) {
 		for (var i = 0; i < activities.length; i++) {
-			id = setActivityMarker(activities[i]);	    
-			createResult(activities[i]['VenueTitle']['value']);
+			setActivityMarker(activities[i]);	    
+			createResult(activities[i], false);
+			resultList.push(activities[i]);
 		}
 		
 		fitMapToMarkers();
 		$("#resultListBox").removeClass("hidden");
-		
-		resultList.push(activities[i]);
 	} else {
 		setMessage("No activities found.", false);
     }
 }
 
 function parseHotels(hotels) {
-    var id;
-
     if (hotels.length > 0) {
-	for (var i = 0; i < hotels.length; i++) {
-	    id = setHotelMarker(hotels[i]);	    
-	    createResult(hotels[i]['Title']['value'], hotels[i]['id']['value']);
-		
-	    resultList.push(hotels[i]);
-	}
-		
-	fitMapToMarkers();
-	$("#resultListBox").removeClass("hidden");
+		for (var i = 0; i < hotels.length; i++) {
+			setHotelMarker(hotels[i]);	    
+			createResult(hotels[i], false);
+			resultList.push(hotels[i]);
+		}
+			
+		fitMapToMarkers();
+		$("#resultListBox").removeClass("hidden");
     } else {
-	setMessage("No hotels found.", false);
+		setMessage("No hotels found.", false);
     }
 }
 
 function parseVenues(venues) {
-    var id;
-    
     if (venues.length > 0) {
-	for (var i = 0; i < venues.length; i++) {
-	    id = setVenueMarker(venues[i]);	    
-	    createResult(venues[i]['VenueTitle']['value'], id);
-	    resultList.push(venues[i]);
-	}
-			
-	fitMapToMarkers();
-	$("#resultListBox").removeClass("hidden");
+		for (var i = 0; i < venues.length; i++) {
+			setVenueMarker(venues[i]);	    
+			createResult(venues[i], true);
+			resultList.push(venues[i]);
+		}
+				
+		fitMapToMarkers();
+		$("#resultListBox").removeClass("hidden");
     } else {
-	setMessage("No venues found.", false);
+		setMessage("No venues found.", false);
     }
 }
 
@@ -147,9 +159,19 @@ function highlightResult(id) {
 	$("#"+id).addClass("highlightedResult");
 }
 
-function createResult(name, id) {
+function createResult(result, searchButton) {
+	var id = result['id']['value'];
     var test = '<div class="result" id=\''+id+'\' onmouseover="highlightMarker(\''+id+'\');" onclick="focusOnMarker(\''+id+'\');"></div>';
-    var result = $(test).text(name);
+    
+    if (searchButton) {
+		var result = $(test).append($('<div class="resultItemTitle">').text(result['title']['value'])
+				.append($('<div class="resultItemButton" onclick="searchActivities(\''+id+'\')">')));
+		if (result['city']) result = $(result).append($('<div>').text(result['city']['value']));
+	} else {
+		var result = $(test).append($('<div class="resultItemTitle">').text(result['title']['value']));
+		if (result['city']) result = $(result).append($('<div>').text(result['city']['value']));
+	}
+	
     $(".resultList").append($(result)
 	.draggable({
 	    cursor: 'move',
@@ -176,24 +198,35 @@ function orderTimelineList() {
 	
 	for (var i = 0; i < documentTimelineItems.length; i++) {
 		for (var j = 0; j < timelineList.length; j++) {
-			if (documentTimelineItems[j].id == timelineList[i]['id']) {
+			if (documentTimelineItems[j].id == timelineList[i]['id']['value']) {
 				newTimelineList.push(timelineList[i]);
 			}
 		}
 	}
 	
-	console.log("finished!");
-	
-	//timelineList = newTimelineList;
+	console.log("Orderning");
+	console.log(timelineList);
+	timelineList = newTimelineList;
+	console.log(timelineList);
 }
 
 function removeItemFromTimeline(id) {
-	console.log("splicing!");
-	console.log(timelineList);
 	for (var i = 0; i < timelineList.length; i++) {
 		if (id == timelineList[i]['id']['value']) {
 			timelineList.splice(i, 1);
 		}
 	}
 	console.log(timelineList);
+}
+
+
+function addActivityToResult(activity, id) {
+	$("#"+id).append($('<div class=\"activityInResult\" id="'+id+'">')
+	.draggable({
+	    cursor: 'move',
+	    connectWith: '.timeline',
+	    helper: 'clone',
+	    opacity: 0.5,
+	    zIndex: 10001
+	}));
 }

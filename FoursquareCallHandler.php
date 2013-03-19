@@ -37,7 +37,7 @@
 
 		$output = curl_exec($ch);
 		$data = json_decode($output);
-
+		
 		$info = curl_getinfo($ch);
 		$errno = curl_errno($ch);
 		if( $output === false) {
@@ -96,6 +96,7 @@
 		$output .= "@prefix dc: <http://purl.org/dc/terms/> . ";
 		$output .= "@prefix fs: <https://api.foursquare.com/v2/venues/> . ";
 		$output .= "@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> . ";
+		$output .= "@prefix foaf: <http://xmlns.com/foaf/0.1/> . ";
 
 		foreach ($venues as $key => &$venue) {
 			$id = "fs:" . $venue->{'id'};
@@ -120,6 +121,10 @@
 				$output .= $id . " geo:city \"" . $venue->{'location'}->{'city'} . "\" . ";
 			} else {
 				$output .= $id . " geo:city \"undefined\" . ";
+			}
+
+			if (isset($venue->{'url'})) {
+				$output .= $id . " foaf:homepage <" . $venue->{'url'} . "> . ";
 			}
 		}
 		return $output;

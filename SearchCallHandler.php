@@ -11,7 +11,7 @@
 	if ($searchType == null) {
 	    header("HTTP/1.0 500 No search type provided.");
 	    exit();
-        }
+	}
 	
 	if ($searchType == "place") {
 	    include("FoursquareCallHandler.php");
