@@ -37,7 +37,7 @@
 
 		$output = curl_exec($ch);
 		$data = json_decode($output);
-		
+
 		$info = curl_getinfo($ch);
 		$errno = curl_errno($ch);
 		if( $output === false) {
@@ -70,6 +70,8 @@
 
 		// Assert results into Sesame repository
 		$triples = parseJSONtoRDF($venues);
+
+		//print $triples; exit();
 		postData($triples, "application/x-turtle");
 
 		// Query Sesame repository
@@ -101,6 +103,7 @@
 		foreach ($venues as $key => &$venue) {
 			$id = "fs:" . $venue->{'id'};
 			$output .= $id . " rdf:type iwa:Place . ";
+			$output .= $id . " iwa:id \"" . $venue->{'id'} . "\" . ";
 			$output .= $id . " dc:title \"" . $venue->{'name'} . "\"@nl . ";
 			$output .= $id . " geo:lat \"" . $venue->{'location'}->{'lat'} . "\" . ";
 			$output .= $id . " geo:long \"" . $venue->{'location'}->{'lng'} . "\" . ";

@@ -32,7 +32,7 @@
 						<option value="hotel">Hotel</option>
 						</select>
 					</td>
-					<td><input class="placeClass activityClass hotelClass" type="text" size="30" id="name" onkeydown="if (event.keyCode == 13) { getResults(); }" value="koffie"/></td>
+					<td><input class="placeClass activityClass hotelClass" type="text" size="30" id="name" onkeydown="if (event.keyCode == 13) { getResults(); }" value="bach"/></td>
 					<td><input class="placeClass activityClass hotelClass" type="text" size="30" id="location" onkeydown="if (event.keyCode == 13) { getResults(); }" value="amsterdam"/></td>
 					<td><input class="activityClass hotelClass" type="text" id="startdatepicker" value=""/></td>
 					<td><input class="activityClass hotelClass" type="text" id="enddatepicker" value=""/></td>
@@ -41,17 +41,17 @@
 					<td></td>
 					<td>
 						<select class="activityClass" id="activityType">
-							<option value="NoPref">Geen voorkeur</option>
-							<option value="Outdoorlocation">Buitenactiviteit</option>
+							<option value="NoPref">No preference</option>
+							<option value="Outdoorlocation">Outdoor location</option>
 							<option value="Theater">Theater</option>
 							<option value="Museum">Museum</option>
-							<option value="Gallery">Galerie</option>
-							<option value="Cinema">Film</option>
-							<option value="Architecture">Architectuur</option>
-							<option value="Landmark">Bekend punt</option>
-							<option value="Dance">Dans</option>
+							<option value="Gallery">Gallery</option>
+							<option value="Cinema">Cinema</option>
+							<option value="Architecture">Architecture</option>
+							<option value="Landmark">Landmark</option>
+							<option value="Dance">Dance</option>
 							<option value="Hotel">Hotel</option>
-							<option value="Music">Muziek</option>
+							<option value="Music">Music</option>
 						</select>
 					</td>
 					<td colspan=2><input type="button" value="Get venues" onclick="getResults();"/></td>
@@ -77,7 +77,7 @@
 	<div id="timelineBox">
 		<div id="timelineTitle"><span class="inputHeader">Timeline</span></div>
 		<div id="trashcan"></div>
-	    <div class="timeline">
+	    <div id="timeline" class="timeline">
 	    </div>
 	</div> 
     

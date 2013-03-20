@@ -161,7 +161,7 @@ cursor:pointer;
 .timelineItem {
 display: inline-block;
 width: 100px;
-height: 90%;
+height: 100px;
 padding: 8px 15px;
 margin: 5px;
 border: 1px solid #ccc;
@@ -173,18 +173,21 @@ background: #eee;
 border-radius: 3px;	
 vertical-align:top;
 box-shadow: 3px 3px 5px #888;
+white-space:normal;
+z-index: 10001;
 }
 
 .timeline {
 clear: both;
 width: 100%;
-min-height: 120px;
-height: 100px;
+height: 150px;
 overflow: hidden;
 white-space:nowrap;
 background-color: #bbb;
 overflow-x: scroll;
 overflow-y: hidden;
+position: absolute;
+bottom: 0;
 }
 
 .highlightedResult {
@@ -220,8 +223,8 @@ display: block;
 margin: 5px;
 display: inline-block;
 float: right;
-height: 32px;
-width: 32px;
+height: 150px;
+width: 150px;
 background: rgba( 255, 255, 255, .8 ) 
 	url('images/trashcanIcon.png') 
 	50% 50% 
@@ -231,6 +234,9 @@ background: rgba( 255, 255, 255, .8 )
 -khtml-border-radius: 3px;
 border-radius: 3px;
 border: 1px solid #d2d4ea;
+position: absolute;
+right: 0;
+bottom: 0;
 }
 
 #timelineTitle {

@@ -57,12 +57,14 @@ function searchActivities(id) {
     //clearResultsList();
     clearMapMarkers();
     
+	console.log("search activities for id :" + id);
 	$("body").addClass("loading");
 	$.getJSON('SearchActivityHandler.php', {
 			"id": id
 		})
 		.success( function(data) {
-			parseActivities(data);
+			console.log(data);
+			parseVenueActivities(data, id);
 			$("body").removeClass("loading");
 		})
 		.error( function(error) {
@@ -101,12 +103,49 @@ function parseResponse(data) {
     }
 }
 
-function parseActivities(activities) {
+function parseVenueActivities(activities, venueId) {
+	console.log(activities.length);
+
 	if (activities.length > 0) {
 		for (var i = 0; i < activities.length; i++) {
-			setActivityMarker(activities[i]);	    
-			createResult(activities[i], false);
+			addActivityToResult(activities[i], venueId);
+
+			setActivityMarker(activities[i]);	   
 			resultList.push(activities[i]);
+		}
+		
+		fitMapToMarkers();
+		$("#resultListBox").removeClass("hidden");
+	} else {
+		setMessage("No activities found.", false);
+    }
+}
+
+function parseActivities(activities) {
+	var venues = [];
+	var parsedActivities = [];
+	console.log(activities.length);
+
+	if (activities.length > 0) {
+		for (var i = 0; i < activities.length; i++) {
+			if (venues.indexOf(activities[i]['venueId']['value']) === -1) {
+				var bla = [];
+				bla['id'] = activities[i]['venueId'];
+				bla['title'] = activities[i]['venueTitle'];
+
+				createResult(bla, false);
+				venues.push(activities[i]['venueId']['value']);
+				if (activities[i]['sameAsVenueId']) {
+					venues.push(activities[i]['sameAsVenueId']['value']);
+				}
+			}
+
+			if (parsedActivities.indexOf(activities[i]['id']['value']) === -1) {
+				addActivityToResult(activities[i], activities[i]['venueId']['value']);
+				setActivityMarker(activities[i]);
+				resultList.push(activities[i]);
+				parsedActivities.push(activities[i]['id']['value']);
+			}
 		}
 		
 		fitMapToMarkers();
@@ -175,6 +214,32 @@ function createResult(result, searchButton) {
     $(".resultList").append($(result)
 	.draggable({
 	    cursor: 'move',
+		appendTo: 'body',
+		containment: 'window',
+		scroll: false,
+	    connectWith: '.timeline',
+	    helper: 'clone',
+	    opacity: 0.5,
+	    zIndex: 10001
+	}));
+}
+
+function createActivityResult(result, searchButton) {
+	var id = result['id']['value'];
+    var test = '<div class="result" id=\''+id+'\' onmouseover="highlightMarker(\''+id+'\');" onclick="focusOnMarker(\''+id+'\');"></div>';
+    
+    if (searchButton) {
+		var result = $(test).append($('<div class="resultItemTitle">').text(result['title']['value'])
+				.append($('<div class="resultItemButton" onclick="searchActivities(\''+id+'\')">')));
+		if (result['city']) result = $(result).append($('<div>').text(result['city']['value']));
+	} else {
+		var result = $(test).append($('<div class="resultItemTitle">').text(result['title']['value']));
+		if (result['city']) result = $(result).append($('<div>').text(result['city']['value']));
+	}
+	
+    $(".resultList").append($(result)
+	.draggable({
+	    cursor: 'move',
 	    connectWith: '.timeline',
 	    helper: 'clone',
 	    opacity: 0.5,
@@ -220,10 +285,15 @@ function removeItemFromTimeline(id) {
 }
 
 
-function addActivityToResult(activity, id) {
-	$("#"+id).append($('<div class=\"activityInResult\" id="'+id+'">')
+function addActivityToResult(activity, venueId) {
+	var activity = $('<div class=\"activityInResult\" id="'+activity['id']['value']+'">').text(activity['title']['value']);
+
+	$("#"+venueId).append(activity
 	.draggable({
 	    cursor: 'move',
+		appendTo: 'body',
+		containment: 'window',
+		scroll: false,
 	    connectWith: '.timeline',
 	    helper: 'clone',
 	    opacity: 0.5,

@@ -45,6 +45,9 @@ $(function() {
 	});
 $(function () {
 	$('.result').draggable({
+		appendTo: 'body',
+		containment: 'window',
+		scroll: false,
 		cursor: 'move',
 		connectWith: '.timeline',
 		helper: 'clone',
@@ -53,14 +56,15 @@ $(function () {
 	});
 		
 	$('.timeline').sortable({
+		appendTo: 'body',
+		containment: 'window',
 		connectWith: '.timeline, #trashcan',
 		cursor: 'move',
 		stop: function(event, ui) {
-			orderTimelineList()
 			calcRoute();
 		}
 	}).droppable({
-		accept: '.result .activityInResult',
+		accept: '.result, .activityInResult',
 		activeClass: 'highlight',
 		drop: function(event, ui) {
 			var $li = $('<div class="timelineItem" >').html(ui.draggable.html());
@@ -83,6 +87,7 @@ $(function () {
 function scaleWindow() {
 	document.getElementById("resultListBox").style.height = (window.innerHeight - document.getElementById("timelineBox").offsetHeight - 80) + "px";
 	document.getElementById("map_canvas").style.height = (window.innerHeight - document.getElementById("timelineBox").offsetHeight) + "px";
+	document.getElementById("timeline").style.width = (window.innerWidth - document.getElementById("trashcan").offsetWidth - 10) + "px";
 }
 
 window.onresize = function(event) {

@@ -61,7 +61,7 @@
 		$info = curl_getinfo($ch);
 		$errno = curl_errno($ch);
 		if( $output === false) {
-			header("HTTP/1.0 500 Unexpected Foursquare server error.");
+			header("HTTP/1.0 500 Unexpected EAN server error.");
 			print "No output was given.";
 			exit();
 		} else if ($info['http_code'] != 200) {
