@@ -12,7 +12,64 @@ margin: 0;
 padding: 0;
 }
 
-.inputHeader {
+input[type="text"]{
+width: 194px;
+border: 1px solid #999;
+padding: 3px;
+}
+input[type="text"]:focus{
+outline: none;
+box-shadow: 0px 0px 3px #61C5FA;
+border:1px solid #5AB0DB;
+}
+input[type="text"]:hover{
+outline: none;
+box-shadow: 0px 0px 5px #61C5FA;
+border:1px solid #5AB0DB;
+border-radius:0;
+}
+
+select {
+width: 200px;
+height: 24px;
+overflow: hidden;
+background: right #ddd;
+border: 1px solid #ccc;
+}
+select:focus{
+outline: none;
+box-shadow: 0px 0px 3px #61C5FA;
+border:1px solid #5AB0DB;
+}
+select:hover{
+outline: none;
+box-shadow: 0px 0px 5px #61C5FA;
+border:1px solid #5AB0DB;
+border-radius:0;
+}
+
+input[type="button"] {
+border:1px solid #61c4ea;
+background: #eee;
+-moz-border-radius: 4px;
+-webkit-border-radius: 4px;
+-khtml-border-radius: 4px;
+border-radius: 4px;
+color: #00ccff;
+font-size:14px;
+font-weight: bold;
+padding: 5px;
+width: 200px;
+text-align: center;
+}
+
+input[type="button"]:hover {
+box-shadow: 0px 0px 3px #61C5FA;
+}
+
+input[type="button"]:active {
+box-shadow: 0px 0px 3px #61C5FA;
+background: #fafafa;
 }
 
 .hidden {
@@ -20,14 +77,18 @@ visibility: hidden;
 display: none;
 }
 
-.label {
+.optionLabel {
 margin-right: 10px;
+margin: 5px;
+color: #999;
+font-size: 12px;
+min-width: 80px;
 }
 
 .contentBox {
-border: 1px solid #d2d4ea;
+border: 2px solid #d2d4ea;
 background-color: #fff;
-padding: 0px 11px 11px 11px;
+padding: 8px;
 -moz-border-radius: 6px;
 -webkit-border-radius: 6px;
 -khtml-border-radius: 6px;
@@ -38,31 +99,28 @@ position: absolute;
 z-index: 1000;
 }
 
-#searchBar {
-}
-
 h2 {
 background: #fff;
 padding: 0 6px 0 0;
 margin: 3px;
+color: #00ccff;
 }
 
 #resultListBox {
 position: absolute;
-border: 1px solid #777;	
-padding: 3px 5px;
 color: #777;
-box-shadow: 3px 3px 5px #888;
--moz-border-radius: 6px;
--webkit-border-radius: 6px;
--khtml-border-radius: 6px;
-border-radius: 6px;
-min-width: 200px;
-overflow: auto;
+width: 300px;
 right: 0;
 }
 
-#resultListBox  tr:hover {
+.resultList {
+display: block;
+width: 100%;
+height: 100%;
+overflow: auto;
+}
+
+#resultListBox tr:hover {
 background: #777;
 color: #FFF;
 cursor: pointer;
@@ -70,7 +128,6 @@ cursor: pointer;
 
 .errorMessage {
 color: red;
-margin: 5px;
 }
 
 #messageDiv {
@@ -82,21 +139,6 @@ overflow: auto;
 position: static;
 z-index: -1000;
 height: 100%;	
-}
-
-#timelineBox {
-background-color: #aaa;
-width: 100%;
-height: 200px;
-position: absolute;
-z-index: 1000;
-bottom: 0;
-}
-
-.resultList {
-display: block;
-width: 100%;
-height: auto;
 }
 
 .result {
@@ -119,7 +161,7 @@ cursor:move;
 display: block;
 width: auto;
 height: auto;
-padding: 8px 12px;
+padding: 8px;
 border: 1px solid #ccc;
 text-align: center;
 background: #ccc;
@@ -158,36 +200,80 @@ border: 2px solid #d2d4ea;
 cursor:pointer;
 }
 
+/* Timeline */
+#timelineBox {
+background-color: #eee;
+width: 100%;
+height: 200px;
+position: absolute;
+z-index: 1000;
+bottom: 0;
+border-top: 3px solid #555;
+}
 .timelineItem {
 display: inline-block;
-width: 100px;
-height: 100px;
+width: 150px;
+height: 100%;
 padding: 8px 15px;
 margin: 5px;
 border: 1px solid #ccc;
 text-align: center;
 background: #eee;
--moz-border-radius: 3px;
--webkit-border-radius: 3px;
--khtml-border-radius: 3px;
-border-radius: 3px;	
+-moz-border-radius: 5px;
+-webkit-border-radius: 5px;
+-khtml-border-radius: 5px;
+border-radius: 5px;	
 vertical-align:top;
 box-shadow: 3px 3px 5px #888;
 white-space:normal;
 z-index: 10001;
 }
-
 .timeline {
 clear: both;
 width: 100%;
-height: 150px;
-overflow: hidden;
+height: 154px;
+overflow: auto;
 white-space:nowrap;
 background-color: #bbb;
-overflow-x: scroll;
 overflow-y: hidden;
-position: absolute;
-bottom: 0;
+-moz-border-radius: 0 8px 0 0;
+-webkit-border-radius: 0 8px 0 0;
+-khtml-border-radius: 0 8px 0 0;
+border-radius: 0 8px 0 0;
+}
+#timelineTitleBar {
+margin: 10px;
+font-weight: bold;
+font-size: 24px;
+display: inline-block;
+float: left;
+color: #00ccff;
+}
+.timelineTitle {
+margin: 0 10px 0 0;
+}
+.timelineDesc {
+margin: 5px;
+color: #999;
+font-size: 20px;
+}
+.hotelItem {
+background: rgba( 255, 255, 255, .8 )
+	url('images/sleepIcon.png') 
+	50% 50% 
+	no-repeat;
+}
+.venueItem {
+background: rgba( 255, 255, 255, .8 )
+	url('images/venueIcon.png') 
+	50% 50% 
+	no-repeat;
+}
+.activityItem {
+background: rgba( 255, 255, 255, .8 )
+	url('images/activityIcon.png') 
+	50% 50% 
+	no-repeat;
 }
 
 .highlightedResult {
@@ -195,7 +281,7 @@ background: #00ccff;
 }
 
 .highlight {
-background: #fff;
+background: #ccc;
 }
 
 /* Loading animation */
@@ -219,30 +305,54 @@ body.loading .modal {
 display: block;
 }
 
-#trashcan {
+/* Message */
+#message {
+position: absolute;
+z-index: 10000;
+top: 20px;
+left: 0;
+right: 0;
+margin-left: auto;
+margin-right: auto;
+max-height: 100px;
+min-height: 30px;
+max-width: 300px;
+background-color: #fff;
+-moz-border-radius: 8px;
+-webkit-border-radius: 8px;
+-khtml-border-radius: 8px;
+border-radius: 8px;
+box-shadow: 0px 0px 8px #61C5FA;
+border: 2px solid #aaa;
+text-align: center;
+font-size: 14px;
+padding: 8px;
+}
+
+.trashcan {
 margin: 5px;
 display: inline-block;
 float: right;
-height: 150px;
+height: 146px;
 width: 150px;
 background: rgba( 255, 255, 255, .8 ) 
-	url('images/trashcanIcon.png') 
+	url('images/trashcanIconPassive.png') 
 	50% 50% 
 	no-repeat;
--moz-border-radius: 3px;
--webkit-border-radius: 3px;
--khtml-border-radius: 3px;
-border-radius: 3px;
-border: 1px solid #d2d4ea;
+-moz-border-radius: 8px;
+-webkit-border-radius: 8px;
+-khtml-border-radius: 8px;
+border-radius: 8px;
+border: 2px solid #d2d4ea;
 position: absolute;
 right: 0;
 bottom: 0;
 }
 
-#timelineTitle {
-margin: 10px;
-font-weight: bold;
-font-size: 24px;
-display: inline-block;
-float: left;
+.trashcanActive {
+border: 2px solid #aaa;
+background: rgba( 255, 255, 255, .8 ) 
+	url('images/trashcanIconActive.png') 
+	50% 50% 
+	no-repeat;
 }

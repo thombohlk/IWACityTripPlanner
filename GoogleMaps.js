@@ -11,15 +11,15 @@ function initializeMap() {
 	directionsService = new google.maps.DirectionsService();
 	directionsDisplay = new google.maps.DirectionsRenderer();
     var mapOptions = {
-	center: new google.maps.LatLng(52.237892,5.349426),
-	zoom: 7,
-	mapTypeId: google.maps.MapTypeId.ROADMAP,
-	panControl: false,
-	zoomControl: false,
-	mapTypeControl: false,
-	scaleControl: false,
-	streetViewControl: false,
-	overviewMapControl: false
+		center: new google.maps.LatLng(52.237892,5.349426),
+		zoom: 7,
+		mapTypeId: google.maps.MapTypeId.ROADMAP,
+		panControl: false,
+		zoomControl: false,
+		mapTypeControl: false,
+		scaleControl: false,
+		streetViewControl: false,
+		overviewMapControl: false
     };
 
     map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
@@ -39,10 +39,10 @@ function initializeMap() {
 function setVenueMarker(venue) {
     var positionMarker = new google.maps.LatLng(venue['lat']['value'], venue['lng']['value']);
     var marker = new google.maps.Marker({
-	position: positionMarker,
-	map: map,
-	icon: pinImage,
-	title: venue['title']['value']
+		position: positionMarker,
+		map: map,
+		icon: pinImage,
+		title: venue['title']['value']
     });
 
     var id = venue['id']['value'];
@@ -59,19 +59,20 @@ function setVenueMarker(venue) {
 
 // Set a marker for a activity and return the id.
 function setActivityMarker(activity) {
-    console.log(activity['lng']['value']);
-    console.log(activity['lat']['value']);
     var positionMarker = new google.maps.LatLng(activity['lat']['value'], activity['lng']['value']);
     var marker = new google.maps.Marker({
-	position: positionMarker,
-	map: map,
-	icon: pinImage,
-	title: activity['title']['value']
+		position: positionMarker,
+		map: map,
+		icon: pinImage,
+		title: activity['title']['value']
     });
 
     //TODO: Add id
-    var id = activity[1];
+    var id = activity['id']['value'];
     var text = "<b>" + activity['title']['value'] + "</b>";
+	if (activity['start']) text+= "<br />Start: " + activity['start']['value'].replace("Z", "").replace("T", " ");
+	if (activity['end']) text+= "<br />End: " + activity['end']['value'].replace("Z", "").replace("T", " ");
+	if (activity['description']) text+= "<br />" + activity['description']['value'];
 
     marker.set("id", id);
     makeInfoWindowEvent(map, infowindow, text, marker);
@@ -83,10 +84,10 @@ function setActivityMarker(activity) {
 function setHotelMarker(hotel) {
     var positionMarker = new google.maps.LatLng(hotel['lat']['value'], hotel['lng']['value']);
     var marker = new google.maps.Marker({
-	position: positionMarker,
-	map: map,
-	icon: pinImage,
-	title: hotel['title']['value']
+		position: positionMarker,
+		map: map,
+		icon: pinImage,
+		title: hotel['title']['value']
     });
 
     //TODO: Add id
@@ -102,10 +103,10 @@ function setHotelMarker(hotel) {
 // Create an on click window event to show infowindow with content for marker.
 function makeInfoWindowEvent(map, infowindow, content, marker) {
     google.maps.event.addListener(marker, 'click', function() {
-	infowindow.setContent(content);
-	infowindow.open(map, marker); 
-	highlightMarker(marker.get("id"));
-	highlightResult(marker.get("id"));
+		infowindow.setContent(content);
+		infowindow.open(map, marker); 
+		highlightMarker(marker.get("id"));
+		highlightResult(marker.get("id"));
     });
 };
 
@@ -188,15 +189,30 @@ function calcRoute() {
 	}
 	
 	if (timelineList.length >= 2) {
+		console.log("Timeline list length: "+ timelineList.length);
+		var transitMode = "google.maps.TravelMode."+$("#timelineTravelMode").val();
+
 		var request = {
 			origin:start,
 			destination:end,
 			waypoints: waypts,
-			travelMode: google.maps.TravelMode.WALKING
+			travelMode: eval("google.maps.TravelMode."+$("#timelineTravelMode").val())
 		};
 		directionsService.route(request, function(result, status) {
 			if (status == google.maps.DirectionsStatus.OK) {
+				var totalDist = 0;
+				var totalDur = 0;
+
+				for (var i = 0; i < result['routes'][0]['legs'].length; i++) {
+					totalDist+= result['routes'][0]['legs'][i]['distance']['value'];
+					totalDur+= result['routes'][0]['legs'][i]['duration']['value'];
+				}
+				$("#timelineDistance").text(Math.ceil(totalDist/1000) + " km");
+				$("#timelineDuration").text(Math.floor(totalDur/3600) + " hours " + Math.ceil(totalDur%3600 / 60) + " min");
+
 				directionsDisplay.setDirections(result);
+			} else {
+				setMessage("Could not find a route for this combination of places and travel mode.", false);
 			}
 		});
 	}

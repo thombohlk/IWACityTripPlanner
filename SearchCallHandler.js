@@ -6,19 +6,18 @@ function checkValues() {
 		if ($("#name").val().length != 0 && $("#location").val().length != 0) {
 			return true;
 		} else {
-			setMessage("Please provide both name and location.", true);
+			setMessage("Please provide both name and location.", false);
 		}
     } else if ($("#searchType").val() == "activity") {
 		if ($("#location").val().length != 0) { 
 			return true;
 		} else {
-			setMessage("Please provide an activity name.", true);
+			setMessage("Please provide an activity name.", false);
 		}
     } else if ($("#searchType").val() == "hotel") {
-		setMessage("Hotel", false);
 		return true;
     } else {	
-		setMessage("Invalid search type provided.", true);
+		setMessage("Invalid search type provided.", false);
 		return false;
     }
     return false;
@@ -75,12 +74,16 @@ function searchActivities(id) {
 
 // Set the given message. If error is true, set the errorMessage class.
 function setMessage(message, error){
-    $("#messageSpan").text(message);
-    $("#messageSpan").removeClass("hidden");
+    $("#message").text(message);
+    $("#message").removeClass("hidden");
     
     if (error) {
-	$("#messageSpan").addClass("errorMessage");
+		$("#message").addClass("errorMessage");
     }
+
+	window.setTimeout(function(){
+		$("#message").addClass("hidden");
+	}, 5000);
 }
 
 // Clear the message container and set proper classes.
@@ -104,14 +107,17 @@ function parseResponse(data) {
 }
 
 function parseVenueActivities(activities, venueId) {
-	console.log(activities.length);
+	var parsedActivities = [];
 
 	if (activities.length > 0) {
 		for (var i = 0; i < activities.length; i++) {
-			addActivityToResult(activities[i], venueId);
-
-			setActivityMarker(activities[i]);	   
-			resultList.push(activities[i]);
+			if (parsedActivities.indexOf(activities[i]['id']['value']) === -1) {
+				activities[i]['type'] = {"value": "activity"};
+				addActivityToResult(activities[i], venueId);
+				setActivityMarker(activities[i]);	   
+				resultList.push(activities[i]);
+				parsedActivities.push(activities[i]['id']['value']);
+			}
 		}
 		
 		fitMapToMarkers();
@@ -129,18 +135,23 @@ function parseActivities(activities) {
 	if (activities.length > 0) {
 		for (var i = 0; i < activities.length; i++) {
 			if (venues.indexOf(activities[i]['venueId']['value']) === -1) {
-				var bla = [];
-				bla['id'] = activities[i]['venueId'];
-				bla['title'] = activities[i]['venueTitle'];
+				var venue = [];
+				venue['id'] = activities[i]['venueId'];
+				venue['type'] = {"value": "venue"};
+				venue['title'] = activities[i]['venueTitle'];
+				venue['lat'] = activities[i]['lat'];
+				venue['lng'] = activities[i]['lng'];
 
-				createResult(bla, false);
+				createResult(venue, false);
 				venues.push(activities[i]['venueId']['value']);
 				if (activities[i]['sameAsVenueId']) {
 					venues.push(activities[i]['sameAsVenueId']['value']);
 				}
+				resultList.push(venue);
 			}
 
 			if (parsedActivities.indexOf(activities[i]['id']['value']) === -1) {
+				activities[i]['type'] = {"value": "activity"};
 				addActivityToResult(activities[i], activities[i]['venueId']['value']);
 				setActivityMarker(activities[i]);
 				resultList.push(activities[i]);
@@ -156,11 +167,16 @@ function parseActivities(activities) {
 }
 
 function parseHotels(hotels) {
+	var parsedHotels = [];
     if (hotels.length > 0) {
 		for (var i = 0; i < hotels.length; i++) {
-			setHotelMarker(hotels[i]);	    
-			createResult(hotels[i], false);
-			resultList.push(hotels[i]);
+			if (parsedHotels.indexOf(hotels[i]['id']['value']) === -1) {
+				hotels[i]['type'] = {"value": "hotel"};
+				setHotelMarker(hotels[i]);	    
+				createResult(hotels[i], false);
+				resultList.push(hotels[i]);
+				parsedHotels.push(hotels[i]['id']['value']);
+			}
 		}
 			
 		fitMapToMarkers();
@@ -171,11 +187,17 @@ function parseHotels(hotels) {
 }
 
 function parseVenues(venues) {
+	var parsedVenues = [];
+	
     if (venues.length > 0) {
 		for (var i = 0; i < venues.length; i++) {
-			setVenueMarker(venues[i]);	    
-			createResult(venues[i], true);
-			resultList.push(venues[i]);
+			if (parsedVenues.indexOf(venues[i]['id']['value']) === -1) {
+				venues[i]['type'] = {"value": "venue"};
+				setVenueMarker(venues[i]);
+				createResult(venues[i], true);
+				resultList.push(venues[i]);
+				parsedVenues.push(venues[i]['id']['value']);
+			}
 		}
 				
 		fitMapToMarkers();
@@ -195,20 +217,25 @@ function clearResultsList() {
 // Clear any highlighted results and highlight the result with ID
 function highlightResult(id) {
 	$("div.result").removeClass("highlightedResult");
+	$("div.activityInResult").removeClass("highlightedResult");
 	$("#"+id).addClass("highlightedResult");
 }
 
 function createResult(result, searchButton) {
 	var id = result['id']['value'];
     var test = '<div class="result" id=\''+id+'\' onmouseover="highlightMarker(\''+id+'\');" onclick="focusOnMarker(\''+id+'\');"></div>';
+	var text = "";
+	if (result['city']) text+= result['city']['value'];
+	if (result['start']) text+= "<br /><i>Start:</i> " + result['start']['value'];
+	if (result['end']) text+= "<br /><i>End:</i> " + result['end']['value'];
     
     if (searchButton) {
 		var result = $(test).append($('<div class="resultItemTitle">').text(result['title']['value'])
 				.append($('<div class="resultItemButton" onclick="searchActivities(\''+id+'\')">')));
-		if (result['city']) result = $(result).append($('<div>').text(result['city']['value']));
+		result = $(result).append($('<div>').text(text));
 	} else {
 		var result = $(test).append($('<div class="resultItemTitle">').text(result['title']['value']));
-		if (result['city']) result = $(result).append($('<div>').text(result['city']['value']));
+		result = $(result).append($('<div>').text(text));
 	}
 	
     $(".resultList").append($(result)
@@ -286,9 +313,13 @@ function removeItemFromTimeline(id) {
 
 
 function addActivityToResult(activity, venueId) {
-	var activity = $('<div class=\"activityInResult\" id="'+activity['id']['value']+'">').text(activity['title']['value']);
+	var text = "<b>"+activity['title']['value']+"</b>";
+	if (activity['city']) text+= activity['city']['value'];
+	if (activity['start']) text+= "<br /><i>Start:</i> " + activity['start']['value'].replace("Z", "").replace("T", " ");
+	if (activity['end']) text+= "<br /><i>End:</i> " + activity['end']['value'].replace("Z", "").replace("T", " ");
+	var activityDiv = $('<div class=\"activityInResult\" id="'+activity['id']['value']+'">').html(text);
 
-	$("#"+venueId).append(activity
+	$("#"+venueId).append(activityDiv
 	.draggable({
 	    cursor: 'move',
 		appendTo: 'body',

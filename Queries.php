@@ -50,13 +50,14 @@ function makeArtsHollandQuery($name, $activityType) {
 		PREFIX gr: <http://purl.org/goodrelations/v1#>
 		PREFIX gn: <http://www.geonames.org/ontology#>
 
-		SELECT DISTINCT ?event ?venueTitle ?title ?lat ?lng ?start ?end ?id ?venueId ?sameAsVenueId WHERE {
+		SELECT DISTINCT ?event ?venueTitle ?title ?lat ?lng ?start ?end ?id ?venueId ?sameAsVenueId ?description WHERE {
 			?event a ah:Event .
 			?event ah:venue ?venue .
 			?event time:hasBeginning ?start .
 			?event time:hasEnd ?end .
 			?event dc:title ?title .
 			?event iwa:id ?id . 
+			OPTIONAL { ?event dc:description ?description . }
 			?venue dc:title ?venueTitle .
 			?venue iwa:id ?venueId .
 			FILTER ( lang(?title) = 'nl' ) .
@@ -112,6 +113,7 @@ function makeArtsHollandConstruct($name) {
 			?Event time:hasBeginning ?Start .
 			?Event iwa:id ?EventId . 
 			?Event time:hasEnd ?End .
+			?Event dc:description ?description .
 			?Venue dc:title ?title .
 			?Venue iwa:id ?VenueId .
 			?Venue geo:lat ?Lat .
@@ -146,6 +148,7 @@ function makeArtsHollandConstruct($name) {
 			?Event time:hasEnd ?End .
 			?Event ah:production ?Production .
 			?Production dc:title ?EventTitle .
+			OPTIONAL { ?Production dc:description ?description . }
 			?Venue dc:title ?title .
 			?Venue ah:cidn ?VenueId .
 			FILTER ( lang(?title) = 'nl' ) .
@@ -195,6 +198,7 @@ function makeHotelQuery($location) {
 		SELECT ?hotel ?title ?lat ?lng ?city ?id WHERE {
 			?hotel a iwa:Hotel .
 			?hotel dc:title ?title .
+			FILTER ( lang(?title) = 'nl' ) .
 			?hotel geo:lat ?lat .
 			?hotel geo:long ?lng .
 			?hotel geo:city ?city .

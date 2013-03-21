@@ -67,16 +67,31 @@ $(function () {
 		accept: '.result, .activityInResult',
 		activeClass: 'highlight',
 		drop: function(event, ui) {
-			var $li = $('<div class="timelineItem" >').html(ui.draggable.html());
-			$li.attr('id', ui.draggable.prop('id'));
-			$li.appendTo(this);
-			moveItemToTimelineList(ui.draggable.prop('id'));
-			calcRoute();
+			var id = $(ui.draggable).attr("id");
+			var text = id;
+			for (var i = 0; i < resultList.length; i++) {
+				if (resultList[i]['id'] && id == resultList[i]['id']['value']) {
+					console.log(resultList[i]);
+					text = '<b>' + resultList[i]['title']['value'] + '</b>';
+					if (resultList[i]['city']) text+= '<br />' + resultList[i]['city']['value'];
+					if (resultList[i]['start']) text+= '<br />' + resultList[i]['start']['value'].replace("Z", "").replace("T", " ");
+					if (resultList[i]['end']) text+= '<br />' + resultList[i]['end']['value'].replace("Z", "").replace("T", " ");
+
+					var $li = $('<div class="timelineItem" >').html(text);
+					if (resultList[i]['type']['value'] == 'hotel') $li.addClass("hotelItem");
+					if (resultList[i]['type']['value'] == 'venue') $li.addClass("venueItem");
+					if (resultList[i]['type']['value'] == 'activity') $li.addClass("activityItem");
+					$li.attr('id', id);
+					$li.appendTo(this);
+					moveItemToTimelineList(id);
+					calcRoute();
+				}
+			}
 		}
 	});
 	$("#trashcan").droppable({
 		accept: ".timeline div",
-		hoverClass: "ui-state-hover",
+		activeClass: "trashcanActive",
 		drop: function(ev, ui) {
 		    ui.draggable.remove();
 			removeItemFromTimeline(ui.draggable.prop('id'));
@@ -88,6 +103,7 @@ function scaleWindow() {
 	document.getElementById("resultListBox").style.height = (window.innerHeight - document.getElementById("timelineBox").offsetHeight - 80) + "px";
 	document.getElementById("map_canvas").style.height = (window.innerHeight - document.getElementById("timelineBox").offsetHeight) + "px";
 	document.getElementById("timeline").style.width = (window.innerWidth - document.getElementById("trashcan").offsetWidth - 10) + "px";
+	document.getElementById("resultList").style.height = (document.getElementById("resultListBox").offsetHeight - 26 - 16) + "px";
 }
 
 window.onresize = function(event) {
