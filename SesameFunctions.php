@@ -18,7 +18,7 @@
 		$errno = curl_errno($ch);
 
 		if( $output === false) {
-			header("HTTP/1.0 500 Unexpected Foursquare server error.");
+			header("HTTP/1.0 500 Unexpected openRDF-Sesame error.");
 			print "No output was given.";
 			exit();
 		} else if ($info['http_code'] != 204) {
@@ -49,7 +49,7 @@
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $header); 
 		curl_setopt($ch, CURLOPT_MAXREDIRS, 5);
-		curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 10);
 		curl_setopt($ch, CURLOPT_URL, $url);
 
 		$output = curl_exec($ch);
@@ -58,13 +58,13 @@
 		$errno = curl_errno($ch);
 
 		if( $output === false) {
-			header("HTTP/1.0 500 Unexpected Foursquare server error.");
+			header("HTTP/1.0 500 Unexpected openRDF-Sesame error.");
 			print "No output was given.";
 			exit();
 		} else if ($info['http_code'] != 200) {
 			header("HTTP/1.0 ".$info['http_code']." ".$errno);
 			print "Get RDF data error http: ".$info['http_code'].", curl error: ".$errno."\n";
-			print $query;
+			print $output;
 			exit();
 		}
 

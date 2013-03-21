@@ -93,6 +93,10 @@ function setHotelMarker(hotel) {
     //TODO: Add id
     var id = hotel['id']['value'];
     var text = "<b>" + hotel['title']['value'] + "</b>";
+	if (hotel['lowRate']) text+= "<br /><i>Lowest rate:</i> &#8364; " + Math.round(hotel['lowRate']['value'] * 100) / 100;
+	if (hotel['highRate']) text+= "<br /><i>Highest rate:</i> &#8364; " + Math.round(hotel['highRate']['value'] * 100) / 100;
+	if (hotel['hotelRating']) text+= "<br />" + hotel['hotelRating']['value']+" stars out of 5";
+	if (hotel['shortDescription']) text+= "<br />" + hotel['shortDescription']['value'];
 
     marker.set("id", id);
     makeInfoWindowEvent(map, infowindow, text, marker);

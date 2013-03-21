@@ -5,18 +5,19 @@
 	
 	//Get the variables needed for the ArtsHolland call and check if they are filled
 	$location = $_GET['location'];
+	$name = $_GET['name'];
 	$startDate = $_GET['startDate'];
 	$endDate = $_GET['endDate'];
 	
 	$startDate = date("m/d/Y", strtotime($startDate));
 	$endDate = date("m/d/Y", strtotime($endDate));
 
-	$hotelList = getHotelList($location);
-	$rdfData = parseJSONtoRDF($hotelList);
+	$hotelList = getHotelList($location, $startDate, $endDate);
+	$rdfData = parseJSONtoRDF($hotelList, $startDate, $endDate);
 	
 	postData($rdfData, "application/x-turtle");
 	
-	$sesamequery = makeHotelQuery($location);
+	$sesamequery = makeHotelQuery($location, $name, $startDate, $endDate);
 	//print $sesamequery; exit();
 	
 	$json = json_decode(getRDFData($sesamequery));
@@ -44,7 +45,7 @@
 			'departureDate' => $endDate,
 			'room1' => '1,3',
 			'room2' => '1,5',
-			'numberOfResults' => '100',
+			'numberOfResults' => '1000',
 			'supplierCacheTolerance' => 'MED_ENHANCED'
 		));
 
@@ -79,7 +80,7 @@
 		return $hotelList;
 	}
 	
-	function parseJSONtoRDF($hotelList) {
+	function parseJSONtoRDF($hotelList, $startDate, $endDate) {
 		$output = '';
 		
 		$output.= "@prefix iwa: <http://example.org/iwa/> . ";
@@ -93,7 +94,16 @@
 			$output.= "geo:lat \"".$hotel->{'latitude'}."\" ; ";
 			$output.= "geo:long \"".$hotel->{'longitude'}."\" ; ";
 			$output.= "geo:city \"".$hotel->{'city'}."\" ; ";
-			$output.= "iwa:id \"".$hotel->{'hotelId'}."\" . ";
+			$output.= "iwa:id \"".$hotel->{'hotelId'}."\" ";
+			//if ($startDate != "") $output.= "iwa:startDate \"".$startDate."\" ";
+			//if ($endDate != "") $output.= "iwa:endDate \"".$endDate."\" ";
+			if ($hotel->{'city'}) $output.= "; geo:city \"".$hotel->{'city'}."\" ";
+			if ($hotel->{'address1'}) $output.= "; iwa:Address \"".$hotel->{'address1'}."\" ";
+			if ($hotel->{'hotelRating'}) $output.= "; iwa:rating \"".$hotel->{'hotelRating'}."\" ";
+			if ($hotel->{'shortDescription'}) $output.= "; dc:description \"".$hotel->{'shortDescription'}."\" ";
+			if ($hotel->{'highRate'}) $output.= "; iwa:highRate \"".$hotel->{'highRate'}."\" ";
+			if ($hotel->{'lowRate'}) $output.= "; iwa:lowRate \"".$hotel->{'lowRate'}."\" ";
+			$output.= ". ";
 		}
 		
 		return $output;

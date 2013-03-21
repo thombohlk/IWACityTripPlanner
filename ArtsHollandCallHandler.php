@@ -12,7 +12,13 @@
     {
 		//Get the variables needed for the ArtsHolland call and check if they are filled
 		$name = $_GET['name'];
+		$location = $_GET['location'];
 		$activityType = $_GET['activityType'];
+
+		if ($location == '' && $name == '') {
+			header("HTTP/1.0 500 ArtsHollandCallHandler.php: location nor name specified.");
+			exit();
+		}
 
 		if ($activityType == '') {
 			header("HTTP/1.0 500 ArtsHollandCallhandler.php: activityType not specified.");
@@ -20,13 +26,16 @@
 		}
 
 		// Create ArtsHolland query, assert results into Sesame
-		$query = makeArtsHollandConstruct($name);
+		$query = makeArtsHollandConstruct($name, $location, $activityType);
+		print $query;
+		print " ";
 		
 		$triples = executeQuery($query, $endpoint);
 		postData($triples);
 
 		// Query Sesame 
-		$sesamequery = makeArtsHollandQuery($name, $activityType);
+		$sesamequery = makeArtsHollandQuery($name, $location, $activityType);
+		print $sesamequery; exit();
 		$json = json_decode(getRDFData($sesamequery));
 		$result = $json->{'results'}->{'bindings'};
 
@@ -58,7 +67,7 @@
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 		curl_setopt($ch, CURLOPT_HTTPHEADER, $header); 
 		curl_setopt($ch, CURLOPT_MAXREDIRS, 5);
-		curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 15);
 		curl_setopt($ch, CURLOPT_URL, $url);;
 
 		$output = curl_exec($ch);

@@ -9,10 +9,10 @@ function checkValues() {
 			setMessage("Please provide both name and location.", false);
 		}
     } else if ($("#searchType").val() == "activity") {
-		if ($("#location").val().length != 0) { 
+		if ($("#location").val().length != 0 || $("#name").val().length != 0) { 
 			return true;
 		} else {
-			setMessage("Please provide an activity name.", false);
+			setMessage("Please provide an activity name or location.", false);
 		}
     } else if ($("#searchType").val() == "hotel") {
 		return true;
@@ -78,7 +78,9 @@ function setMessage(message, error){
     $("#message").removeClass("hidden");
     
     if (error) {
-		$("#message").addClass("errorMessage");
+	$("#message").addClass("errorMessage");
+    } else {
+	$("#message").removeClass("errorMessage");
     }
 
 	window.setTimeout(function(){
@@ -226,16 +228,22 @@ function createResult(result, searchButton) {
     var test = '<div class="result" id=\''+id+'\' onmouseover="highlightMarker(\''+id+'\');" onclick="focusOnMarker(\''+id+'\');"></div>';
 	var text = "";
 	if (result['city']) text+= result['city']['value'];
+
+	// Activity
 	if (result['start']) text+= "<br /><i>Start:</i> " + result['start']['value'];
 	if (result['end']) text+= "<br /><i>End:</i> " + result['end']['value'];
+
+	// Hotel
+	if (result['lowRate']) text+= "<br /><i>Lowest rate:</i> &#8364; " + Math.round(result['lowRate']['value'] * 100) / 100;
+	if (result['highRate']) text+= "<br /><i>Highest rate:</i> &#8364; " + Math.round(result['highRate']['value'] * 100) / 100;
     
     if (searchButton) {
 		var result = $(test).append($('<div class="resultItemTitle">').text(result['title']['value'])
 				.append($('<div class="resultItemButton" onclick="searchActivities(\''+id+'\')">')));
-		result = $(result).append($('<div>').text(text));
+		result = $(result).append($('<div>').html(text));
 	} else {
 		var result = $(test).append($('<div class="resultItemTitle">').text(result['title']['value']));
-		result = $(result).append($('<div>').text(text));
+		result = $(result).append($('<div>').html(text));
 	}
 	
     $(".resultList").append($(result)
