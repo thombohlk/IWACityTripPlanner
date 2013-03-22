@@ -67,6 +67,7 @@
 			unset($venue->{'referralId'});
 			unset($venue->{'restricted'});
 		}
+		//print json_encode($venues); exit();
 
 		// Assert results into Sesame repository
 		$triples = parseJSONtoRDF($venues);
@@ -80,7 +81,7 @@
 		$result = $json->{'results'}->{'bindings'};
 
 		// Return data as JSON object
-		print json_encode($result);
+		print json_encode($result); exit();
 
     }
     catch (Exception $e)
@@ -104,24 +105,24 @@
 			$id = "fs:" . $venue->{'id'};
 			$output .= $id . " rdf:type iwa:Place . ";
 			$output .= $id . " iwa:id \"" . $venue->{'id'} . "\" . ";
-			$output .= $id . " dc:title \"" . $venue->{'name'} . "\"@nl . ";
+			$output .= $id . " dc:title \"" . str_replace("\"", "", $venue->{'name'}) . "\"@nl . ";
 			$output .= $id . " geo:lat \"" . $venue->{'location'}->{'lat'} . "\" . ";
 			$output .= $id . " geo:long \"" . $venue->{'location'}->{'lng'} . "\" . ";
 
 			if (isset($venue->{'location'}->{'address'})) {
-				$output .= $id . " iwa:Address \"" . $venue->{'location'}->{'address'} . "\" . ";
+				$output .= $id . " iwa:Address \"" . str_replace("\"", "", $venue->{'location'}->{'address'}) . "\" . ";
 			} else {
 				$output .= $id . " iwa:Address \"undefined\" . ";
 			}
 
 			if (isset($venue->{'location'}->{'postalCode'})) {
-				$output .= $id . " iwa:PostalCode \"" . $venue->{'location'}->{'postalCode'} . "\" . ";
+				$output .= $id . " iwa:PostalCode \"" . str_replace("\"", "", $venue->{'location'}->{'postalCode'}) . "\" . ";
 			} else {
 				$output .= $id . " iwa:PostalCode \"undefined\" . ";
 			}
 
 			if (isset($venue->{'location'}->{'city'})) {
-				$output .= $id . " geo:city \"" . $venue->{'location'}->{'city'} . "\" . ";
+				$output .= $id . " geo:city \"" . str_replace("\"", "", $venue->{'location'}->{'city'}) . "\" . ";
 			} else {
 				$output .= $id . " geo:city \"undefined\" . ";
 			}

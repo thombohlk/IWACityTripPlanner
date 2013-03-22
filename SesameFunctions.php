@@ -72,4 +72,46 @@
 
 		return $output;
 	}
+
+	function resetRepository() {
+		clearRepository();
+
+		$file = "data/inferenceRules.txt";
+		$fh = fopen($file, 'r');
+		$rules = fread($fh, filesize($file));
+		fclose($fh);
+
+		postData($rules, "application/x-turtle");
+	}
+
+	function clearRepository() {
+
+		// Create the url 
+		$url = "http://77.250.167.72:8080/openrdf-sesame/repositories/CityTripPlanner/statements";
+		$header[0] = "Content-Type:application/x-www-form-urlencoded"; 
+	
+		//set the url, number of POST vars, POST data
+		$ch = curl_init();
+		//curl_setopt($ch, CURLOPT_HTTPHEADER, $header); 
+		curl_setopt($ch, CURLOPT_URL, $url);
+		curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+		//curl_setopt($ch, CURLOPT_POSTFIELDS, $triples); 
+
+		$output = curl_exec($ch);
+
+		$info = curl_getinfo($ch);
+		$errno = curl_errno($ch);
+
+		if( $output === false) {
+			header("HTTP/1.0 500 Unexpected openRDF-Sesame error.");
+			print "No output was given.";
+			exit();
+		} else if ($info['http_code'] != 204) {
+			header("HTTP/1.0 ".$info['http_code']." ".$errno);
+			print "Postdata error http: ".$info['http_code'].", curl error: ".$errno."\n";
+			exit();
+		}
+
+		curl_close($ch);
+	}
 ?>

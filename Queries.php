@@ -1,56 +1,7 @@
 <?php
-/*
-print "<html><head></head><body>";
 
-print "MAKEARTSHOLLANDQUERY(museon, 'den haag', nopref)<br><br>";
-print "<pre>";
-makeArtsHollandQuery("museon", "den haag", "NoPref");
-print "</pre>";
-print "<br><br><hr><br><br>";
-
-print "MAKEARTSHOLLANDQUERY('', 'den haag', nopref)<br><br>";
-print "<pre>";
-makeArtsHollandQuery("", "den haag", "NoPref");
-print "</pre>";
-print "<br><br><hr><br><br>";
-
-print "</body></html>";
-*/
-// Foursquare venue query
-function makeVenueQuery($name, $location) {
-    // Create query
-    $query = "
-	PREFIX iwa: <http://example.org/iwa/>
-	PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
-	PREFIX dc: <http://purl.org/dc/terms/>
-	PREFIX fs: <https://api.foursquare.com/v2/venues/>
-
-	SELECT DISTINCT ?venue ?id ?title ?lat ?lng ?address ?postalCode ?city WHERE {";
-
-    	$query .= "
-	    ?venue rdf:type iwa:Place .
-		?venue iwa:id ?id .
-	    ?venue dc:title ?title .
-	    ?venue geo:lat ?lat .
-	    ?venue geo:long ?lng .
-	    ?venue iwa:PostalCode ?postalCode .
-	    ?venue iwa:Address ?address .
-	    ?venue geo:city ?city .
-	    FILTER ( lang(?title) = 'nl' ) .
-	    FILTER regex(?title, '$name', 'i' ) .
-
-	} LIMIT 100
-	";
-
-	    // TODO Filter voor location? Hoedan?
-
-	return $query;
-}
-
-function makeArtsHollandQuery($name, $location, $activityType, $startDate, $endDate) {
-	// Create query
-	$query = "
-		PREFIX ah: <http://purl.org/artsholland/1.0/>
+// Global variable with all prefixes needed in queries and constructs.
+$prefixes = "PREFIX ah: <http://purl.org/artsholland/1.0/>
 		PREFIX iwa: <http://example.org/iwa/>
 		PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 		PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -66,7 +17,38 @@ function makeArtsHollandQuery($name, $location, $activityType, $startDate, $endD
 		PREFIX search: <http://rdf.opensahara.com/search#>
 		PREFIX fn: <http://www.w3.org/2005/xpath-functions#>
 		PREFIX gr: <http://purl.org/goodrelations/v1#>
-		PREFIX gn: <http://www.geonames.org/ontology#>
+		PREFIX gn: <http://www.geonames.org/ontology#>";
+
+// Foursquare venue query
+function makeVenueQuery($name, $location) {
+	global $prefixes;
+
+	// Create query
+	$query = $prefixes."
+
+	SELECT DISTINCT ?venue ?id ?title ?lat ?lng ?address ?postalCode ?city ?homepage WHERE {
+		?venue rdf:type iwa:Place .
+		?venue iwa:id ?id .
+		?venue dc:title ?title .
+		?venue geo:lat ?lat .
+		?venue geo:long ?lng .
+		?venue iwa:PostalCode ?postalCode .
+		?venue iwa:Address ?address .
+		?venue geo:city ?city .
+		OPTIONAL { ?venue foaf:homepage ?homepage . } .
+		FILTER ( lang(?title) = 'nl' ) .
+		FILTER regex(?title, '$name', 'i' ) .
+		FILTER regex(?city, '$location', 'i' ) .
+	} LIMIT 100";
+
+	return $query;
+}
+
+// Query for searching activities in Arts Holland repository
+function makeArtsHollandQuery($name, $location, $activityType, $startDate, $endDate) {
+	global $prefixes;
+
+	$query = $prefixes."		
 
 		SELECT DISTINCT ?event ?venueTitle ?title ?lat ?lng ?start ?end ?id ?venueId ?sameAsVenueId ?description WHERE {
 			?event a ah:Event .
@@ -87,58 +69,39 @@ function makeArtsHollandQuery($name, $location, $activityType, $startDate, $endD
 			?locAdd vcard:locality ?locatie . 
 		";
 
-		if ($name != "" && $location == "") {
-			$query .= "FILTER (regex(str(?title), '$name', 'i') || regex(str(?venueTitle), '$name', 'i')) . 
-				";
-		} else if ($name == "" && $location != "") {
-			$query .= "FILTER (regex(str(?venueTitle), '$location', 'i') || regex(str(?locatie), '$location', 'i')) . 
-				";
-		} else if ($name != "" && $location != "") {
-			$query .= "FILTER ((regex(str(?venueTitle), '$name', 'i') && regex(str(?locatie), '$location', 'i')) ||
-								(regex(str(?title), '$name', 'i') && regex(str(?locatie), '$location', 'i')) ||
-								(regex(str(?title), '$name', 'i') && regex(str(?venueTitle), '$location', 'i'))) . 
-				";
-		}
+	// Depending on the availebility of $name and $location, a combination of filters is added.
+	if ($name != "" && $location == "") {
+		$query .= "FILTER (regex(str(?title), '$name', 'i') || regex(str(?venueTitle), '$name', 'i')) . 
+			";
+	} else if ($name == "" && $location != "") {
+		$query .= "FILTER (regex(str(?venueTitle), '$location', 'i') || regex(str(?locatie), '$location', 'i')) . 
+			";
+	} else if ($name != "" && $location != "") {
+		$query .= "FILTER ((regex(str(?venueTitle), '$name', 'i') && regex(str(?locatie), '$location', 'i')) ||
+							(regex(str(?title), '$name', 'i') && regex(str(?locatie), '$location', 'i')) ||
+							(regex(str(?title), '$name', 'i') && regex(str(?venueTitle), '$location', 'i'))) . 
+			";
+	}
 
-		if ($startDate != "") {
-			$query .= "FILTER (xsd:dateTime(?start) >= \"$startDate\"^^xsd:dateTime) . 
-				";
-		}
-		if ($endDate != "") {
-			$query .= "FILTER (xsd:dateTime(?end) <= \"$endDate\"^^xsd:dateTime) . 
-				";
-		}
-
-		if ($activityType != "NoPref") {
-			$query .= "?event iwa:eventType ah:VenueType".$activityType." .
-				";
-		}
+	// Set filter for start and end date if present.
+	if ($startDate != "") $query .= "FILTER (xsd:dateTime(?start) >= \"$startDate\"^^xsd:dateTime) . ";
+	if ($endDate != "") $query .= "FILTER (xsd:dateTime(?end) <= \"$endDate\"^^xsd:dateTime) . ";
+	
+	// Set filter for activity type if present.
+	if ($activityType != "NoPref") $query .= "?event iwa:eventType ah:VenueType".$activityType." .	";
 
 	$query .= "} LIMIT 100";
+
 	return $query;
-//	print $query;
 }
 
+// Construct for retreiving RDF data from Arts Holland endpoint.
 function makeArtsHollandConstruct($name, $location, $activityType) {
-	// Create query
-	$query = "
-		PREFIX ah: <http://purl.org/artsholland/1.0/>
-		PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-		PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-		PREFIX owl: <http://www.w3.org/2002/07/owl#>
-		PREFIX dc: <http://purl.org/dc/terms/>
-		PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-		PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-		PREFIX time: <http://www.w3.org/2006/time#>
-		PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
-		PREFIX vcard: <http://www.w3.org/2006/vcard/ns#>
-		PREFIX osgeo: <http://rdf.opensahara.com/type/geo/>
-		PREFIX bd: <http://www.bigdata.com/rdf/search#>
-		PREFIX search: <http://rdf.opensahara.com/search#>
-		PREFIX fn: <http://www.w3.org/2005/xpath-functions#>
-		PREFIX gr: <http://purl.org/goodrelations/v1#>
-		PREFIX gn: <http://www.geonames.org/ontology#>
-		PREFIX iwa: <http://example.org/iwa/>
+	global $prefixes;
+
+	/* Create construct with a union. The union is needed as the title of an
+	event can come from either the event or the production of the event. */
+	$query = $prefixes."
 
 		CONSTRUCT {
 			?Event a ah:Event .
@@ -179,19 +142,21 @@ function makeArtsHollandConstruct($name, $location, $activityType) {
 				?LocAddr vcard:street-address ?Address .	
 		";
 
+	// Depending on the availebility of $name and $location, a combination of filters is added.
 	if ($name != "" && $location == "") {
 		$query .= "FILTER (regex(str(?EventTitle), '$name', 'i') || regex(str(?VenueTitle), '$name', 'i')) . 
 			";
 	} else if ($name == "" && $location != "") {
-		$query .= "FILTER (regex(str(?VenueTitle), '$location', 'i') || regex(str(?locatie), '$location', 'i')) . 
+		$query .= "FILTER (regex(str(?VenueTitle), '$location', 'i') || regex(str(?Locality), '$location', 'i')) . 
 			";
 	} else if ($name != "" && $location != "") {
-		$query .= "FILTER ((regex(str(?VenueTitle), '$name', 'i') && regex(str(?locatie), '$location', 'i')) ||
-							(regex(str(?EventTitle), '$name', 'i') && regex(str(?locatie), '$location', 'i')) ||
+		$query .= "FILTER ((regex(str(?VenueTitle), '$name', 'i') && regex(str(?Locality), '$location', 'i')) ||
+							(regex(str(?EventTitle), '$name', 'i') && regex(str(?Locality), '$location', 'i')) ||
 							(regex(str(?EventTitle), '$name', 'i') && regex(str(?VenueTitle), '$location', 'i'))) . 
 			";
 	}
 
+	// Add the other half of the union.
 	$query.= "
 			} UNION {
 				?Event a ah:Event .
@@ -215,15 +180,16 @@ function makeArtsHollandConstruct($name, $location, $activityType) {
 				?LocAddr vcard:street-address ?Address .	
 		";
 
+	// Depending on the availebility of $name and $location, a combination of filters is added.
 	if ($name != "" && $location == "") {
 		$query .= "FILTER (regex(str(?EventTitle), '$name', 'i') || regex(str(?VenueTitle), '$name', 'i')) . 
 			";
 	} else if ($name == "" && $location != "") {
-		$query .= "FILTER (regex(str(?VenueTitle), '$location', 'i') || regex(str(?locatie), '$location', 'i')) . 
+		$query .= "FILTER (regex(str(?VenueTitle), '$location', 'i') || regex(str(?Locality), '$location', 'i')) . 
 			";
 	} else if ($name != "" && $location != "") {
-		$query .= "FILTER ((regex(str(?VenueTitle), '$name', 'i') && regex(str(?locatie), '$location', 'i')) ||
-							(regex(str(?EventTitle), '$name', 'i') && regex(str(?locatie), '$location', 'i')) ||
+		$query .= "FILTER ((regex(str(?VenueTitle), '$name', 'i') && regex(str(?Locality), '$location', 'i')) ||
+							(regex(str(?EventTitle), '$name', 'i') && regex(str(?Locality), '$location', 'i')) ||
 							(regex(str(?EventTitle), '$name', 'i') && regex(str(?VenueTitle), '$location', 'i'))) . 
 			";
 	}
@@ -233,28 +199,12 @@ function makeArtsHollandConstruct($name, $location, $activityType) {
 	return $query;
 }
 
+// Query for retreiving hotel RDF data from Sesame endpoint.
 function makeHotelQuery($location, $name, $startDate, $endDate) {
-	$query = "
-		PREFIX dc:<http://purl.org/dc/terms/>
-		PREFIX onto:<http://www.ontotext.com/>
-		PREFIX geo:<http://www.w3.org/2003/01/geo/wgs84_pos#>
-		PREFIX foaf:<http://xmlns.com/foaf/0.1/>
-		PREFIX vcard:<http://www.w3.org/2006/vcard/ns#>
-		PREFIX gn:<http://www.geonames.org/ontology#>
-		PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
-		PREFIX time:<http://www.w3.org/2006/time#>
-		PREFIX search:<http://rdf.opensahara.com/search#>
-		PREFIX osgeo:<http://rdf.opensahara.com/type/geo/>
-		PREFIX iwa:<http://example.org/iwa/>
-		PREFIX xsd:<http://www.w3.org/2001/XMLSchema#>
-		PREFIX owl:<http://www.w3.org/2002/07/owl#>
-		PREFIX fs:<https://api.foursquare.com/v2/venues/>
-		PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-		PREFIX gr:<http://purl.org/goodrelations/v1#>
-		PREFIX fn:<http://www.w3.org/2005/xpath-functions#>
-		PREFIX ah:<http://purl.org/artsholland/1.0/>
-		PREFIX bd:<http://www.bigdata.com/rdf/search#>
-		PREFIX bigdata:<http://www.bigdata.com/rdf#>
+	global $prefixes;
+
+	// Create query
+	$query = $prefixes."
 
 		SELECT ?hotel ?title ?lat ?lng ?city ?id ?city ?address ?hotelRating ?shortDescription ?highRate ?lowRate WHERE {
 			?hotel a iwa:Hotel .
@@ -273,64 +223,108 @@ function makeHotelQuery($location, $name, $startDate, $endDate) {
 
 		";
 
-	if ($location != '') { 
-		$query .= "FILTER regex(str(?city), '$location', 'i') .";
-	}
+	// Set filter for location if present.
+	if ($location != '') $query .= "FILTER regex(str(?city), str('".str_replace(array("\"", "'"), $replace, $location)."'), 'i') .";
 
-	if ($name != '') { 
-		$query .= "FILTER regex(str(?title), '$name', 'i') .";
-	}
-
-	/*if ($startDate != '') {
-
-	}
-FILTER(xsd:dateTime(?birth) >= "1984-12-12T00:00:00Z"^^xsd:dateTime &&
-        xsd:dateTime(?birth) <= "1984-12-12T23:59:59Z"^^xsd:dateTime) .*/
+	// Set filter for name if present.
+	if ($name != '') $query .= "FILTER regex(str(?title), '$name', 'i') .";
 
 	$query .= "} LIMIT 1000";
 
 	return $query;
 }
 
+// Query for searching activities by $id at Sesame endpoint.
 function makeSearchActivityQuery($id) {
+	global $prefixes;
+
 	// Create query
-	$query = "
-		PREFIX ah: <http://purl.org/artsholland/1.0/>
-		PREFIX iwa:<http://example.org/iwa/>
-		PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-		PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-		PREFIX owl: <http://www.w3.org/2002/07/owl#>
-		PREFIX dc: <http://purl.org/dc/terms/>
-		PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-		PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-		PREFIX time: <http://www.w3.org/2006/time#>
-		PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#>
-		PREFIX vcard: <http://www.w3.org/2006/vcard/ns#>
-		PREFIX osgeo: <http://rdf.opensahara.com/type/geo/>
-		PREFIX bd: <http://www.bigdata.com/rdf/search#>
-		PREFIX search: <http://rdf.opensahara.com/search#>
-		PREFIX fn: <http://www.w3.org/2005/xpath-functions#>
-		PREFIX gr: <http://purl.org/goodrelations/v1#>
-		PREFIX gn: <http://www.geonames.org/ontology#>
+	$query = $prefixes."
 
 		SELECT DISTINCT ?event ?title ?eventTitle ?lat ?lng ?start ?end ?id ?sameAsId WHERE {
-			?place rdf:type iwa:Place .
 			?place iwa:id \"$id\" .
 			?event a ah:Event .
 			?event ah:venue ?place .
 			?event time:hasBeginning ?start .
 			?event time:hasEnd ?end .
-			?event dc:title ?eventTitle .
+			?event dc:title ?title .
 			?event iwa:id ?id . 
-			?place dc:title ?title .
-			FILTER ( lang(?title) = 'nl' ) .
 			?place geo:lat ?lat .
 			?place geo:long ?lng .
-			?place owl:sameAs ?sameAs .
-			?sameAs iwa:id ?sameAsId .
+			OPTIONAL { ?place owl:sameAs ?sameAs .
+			?sameAs iwa:id ?sameAsId . }
 		} LIMIT 100";
-		
-	//print $query; exit();
+
+	return $query;
+}
+
+/* Construct for searching activities taking place at a venue with
+homepage $hompage in Arts Holland endpoint. */
+function makeArtsHollandVenueConstruct($id, $homepage) {
+	global $prefixes;
+
+	// Create dummy string for $homepage if it is empty.
+	if ($homepage == "") $homepage = "\"empty\"	";
+
+	/* Create construct with a union. The union is needed as the title of an
+	event can come from either the event or the production of the event. */
+	$query = $prefixes."
+
+		CONSTRUCT {
+			?Event a ah:Event .
+			?Event ah:venue ?Venue .
+			?Event dc:title ?EventTitle .
+			?Event time:hasBeginning ?Start .
+			?Event iwa:id ?EventId . 
+			?Event time:hasEnd ?End .
+			?Event dc:description ?description .
+			?Venue dc:title ?VenueTitle .
+			?Venue iwa:id ?VenueId .
+			?Venue geo:lat ?Lat .
+			?Venue geo:long ?Long .
+			?Venue ah:venueType ?VenueType .
+			?Venue foaf:homepage $homepage .
+			?Venue ah:locationAddress ?LocAddr .
+			?LocAddr vcard:locality ?Locality .
+			?LocAddr vcard:postal-code ?PostalCode .
+			?LocAddr vcard:street-address ?Address .	
+		} WHERE { {
+				?Event a ah:Event .
+				?Event ah:cidn ?EventId .
+				?Event ah:venue ?Venue .
+				?Event time:hasBeginning ?Start .
+				?Event time:hasEnd ?End .
+				?Event dc:title ?EventTitle .
+				?Venue dc:title ?VenueTitle .
+				?Venue ah:cidn ?VenueId .
+				FILTER ( lang(?VenueTitle) = 'nl' ) .
+				?Venue geo:lat ?Lat .
+				?Venue geo:long ?Long .
+				?Venue foaf:homepage $homepage . 
+				?Venue ah:locationAddress ?LocAddr .
+				?LocAddr vcard:locality ?Locality .
+				?LocAddr vcard:postal-code ?PostalCode .
+				?LocAddr vcard:street-address ?Address . 
+		} UNION {
+				?Event a ah:Event .
+				?Event ah:cidn ?EventId .
+				?Event ah:venue ?Venue .
+				?Event time:hasBeginning ?Start .
+				?Event time:hasEnd ?End .
+				?Event ah:production ?Production .
+				?Production dc:title ?EventTitle .
+				?Venue dc:title ?VenueTitle .
+				?Venue ah:cidn ?VenueId .
+				FILTER ( lang(?VenueTitle) = 'nl' ) .
+				?Venue geo:lat ?Lat .
+				?Venue geo:long ?Long .
+				?Venue foaf:homepage $homepage . 
+				?Venue ah:locationAddress ?LocAddr .
+				?LocAddr vcard:locality ?Locality .
+				?LocAddr vcard:postal-code ?PostalCode .
+				?LocAddr vcard:street-address ?Address .
+		} }";
+
 	return $query;
 }
 

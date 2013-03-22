@@ -9,10 +9,10 @@ function checkValues() {
 			setMessage("Please provide both name and location.", false);
 		}
     } else if ($("#searchType").val() == "activity") {
-		if ($("#location").val().length != 0 || $("#name").val().length != 0) { 
+		if ($("#location").val().length != 0) { 
 			return true;
 		} else {
-			setMessage("Please provide an activity name or location.", false);
+			setMessage("Please provide an activity name.", false);
 		}
     } else if ($("#searchType").val() == "hotel") {
 		return true;
@@ -51,19 +51,24 @@ function getResults() {
     }
 }
 
-function searchActivities(id) {
+function searchActivities(venueId, venueHomepage) {
     clearMessage();
     //clearResultsList();
     clearMapMarkers();
     
-	console.log("search activities for id :" + id);
+	// Remove search button
+	$('div.resultItemButton[id=\"'+venueId+'-searchButton\"]').addClass("hidden");
+	
+	console.log("search activities for venueId :" + venueId);
 	$("body").addClass("loading");
 	$.getJSON('SearchActivityHandler.php', {
-			"id": id
+			"id": venueId,
+			"homepage": venueHomepage
 		})
 		.success( function(data) {
 			console.log(data);
-			parseVenueActivities(data, id);
+
+			parseVenueActivities(data, venueId);
 			$("body").removeClass("loading");
 		})
 		.error( function(error) {
@@ -74,18 +79,18 @@ function searchActivities(id) {
 
 // Set the given message. If error is true, set the errorMessage class.
 function setMessage(message, error){
-    $("#message").text(message);
+	$("#message").text(message);
     $("#message").removeClass("hidden");
     
     if (error) {
-	$("#message").addClass("errorMessage");
+		$("#message").addClass("errorMessage");
     } else {
-	$("#message").removeClass("errorMessage");
-    }
+		$("#message").removeClass("errorMessage");
+	}
 
-	window.setTimeout(function(){
-		$("#message").addClass("hidden");
-	}, 5000);
+    window.setTimeout(function(){
+	    $("#message").addClass("hidden");
+    }, 5000);
 }
 
 // Clear the message container and set proper classes.
@@ -224,6 +229,7 @@ function highlightResult(id) {
 }
 
 function createResult(result, searchButton) {
+	console.log(result);
 	var id = result['id']['value'];
     var test = '<div class="result" id=\''+id+'\' onmouseover="highlightMarker(\''+id+'\');" onclick="focusOnMarker(\''+id+'\');"></div>';
 	var text = "";
@@ -238,8 +244,13 @@ function createResult(result, searchButton) {
 	if (result['highRate']) text+= "<br /><i>Highest rate:</i> &#8364; " + Math.round(result['highRate']['value'] * 100) / 100;
     
     if (searchButton) {
+		if (result['homepage']) {
+			var searchButton = $('<div class="resultItemButton" id="'+id+'-searchButton" onclick="searchActivities(\''+id+'\', \'<'+result['homepage']['value']+'>\')">');
+		} else {
+			var searchButton = $('<div class="resultItemButton" id="'+id+'-searchButton" onclick="searchActivities(\''+id+'\', \'\')">');
+		}
 		var result = $(test).append($('<div class="resultItemTitle">').text(result['title']['value'])
-				.append($('<div class="resultItemButton" onclick="searchActivities(\''+id+'\')">')));
+				.append(searchButton));
 		result = $(result).append($('<div>').html(text));
 	} else {
 		var result = $(test).append($('<div class="resultItemTitle">').text(result['title']['value']));

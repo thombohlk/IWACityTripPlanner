@@ -158,6 +158,7 @@ function focusOnMarker(id) {
 		var markerID = currentMarkers[i].get("id");
 		if (id == markerID) {
 			map.setCenter(currentMarkers[i].getPosition());
+			infowindow.open(map, currentMarkers[i]);
 		}
     }
 }

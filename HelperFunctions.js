@@ -30,6 +30,7 @@ $(function() {
 
 	},
 	$.datepicker.regional['nl']);
+	$("#startdatepicker").datepicker("setDate",new Date());
 	});
 $(function() {
 	$( "#enddatepicker" ).datepicker({
@@ -98,6 +99,21 @@ $(function () {
 	}
 });
 });
+
+function resetRepository() {
+	$("body").addClass("loading");
+	$.getJSON('SesameCallHandler.php', {
+			"call": "reset"
+			})
+            .success( function(data) {
+                $("body").removeClass("loading");
+                setMessage("Starting with a clean sheet.", false);
+            })
+            .error( function(error) {
+                $("body").removeClass("loading");
+                setMessage(error.statusText, true);
+            });  
+}
 
 function scaleWindow() {
 	document.getElementById("resultListBox").style.height = (window.innerHeight - document.getElementById("timelineBox").offsetHeight - 80) + "px";

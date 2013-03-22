@@ -59,7 +59,7 @@ color: #00ccff;
 font-size:14px;
 font-weight: bold;
 padding: 5px;
-width: 200px;
+width: 154px;
 text-align: center;
 }
 
@@ -274,6 +274,11 @@ background: rgba( 255, 255, 255, .8 )
 	url('images/activityIcon.png') 
 	50% 50% 
 	no-repeat;
+}
+
+#resetButton {
+float: right;
+margin: 6px;
 }
 
 .highlightedResult {

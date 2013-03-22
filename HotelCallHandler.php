@@ -86,26 +86,28 @@
 		$output.= "@prefix iwa: <http://example.org/iwa/> . ";
 		$output.= "@prefix dc: <http://purl.org/dc/terms/> . ";
 		$output.= "@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> . ";
+
+		$search = array("'", "\"");
+		$replace = "";
 		
 		foreach ($hotelList as $key => &$hotel) {
 			$output.= "iwa:".$hotel->{'hotelId'}." ";
 			$output.= "rdf:type iwa:Hotel ; ";
-			$output.= "dc:title \"".$hotel->{'name'}."\"@nl ; ";
+			$output.= "dc:title \"".str_replace($search, $replace, $hotel->{'name'})."\"@nl ; ";
 			$output.= "geo:lat \"".$hotel->{'latitude'}."\" ; ";
 			$output.= "geo:long \"".$hotel->{'longitude'}."\" ; ";
-			$output.= "geo:city \"".$hotel->{'city'}."\" ; ";
 			$output.= "iwa:id \"".$hotel->{'hotelId'}."\" ";
 			//if ($startDate != "") $output.= "iwa:startDate \"".$startDate."\" ";
 			//if ($endDate != "") $output.= "iwa:endDate \"".$endDate."\" ";
-			if ($hotel->{'city'}) $output.= "; geo:city \"".$hotel->{'city'}."\" ";
-			if ($hotel->{'address1'}) $output.= "; iwa:Address \"".$hotel->{'address1'}."\" ";
+			if ($hotel->{'city'}) $output.= "; geo:city \"".str_replace($search, $replace, $hotel->{'city'})."\" ";
+			if ($hotel->{'address1'}) $output.= "; iwa:Address \"".str_replace($search, $replace, $hotel->{'address1'})."\" ";
 			if ($hotel->{'hotelRating'}) $output.= "; iwa:rating \"".$hotel->{'hotelRating'}."\" ";
-			if ($hotel->{'shortDescription'}) $output.= "; dc:description \"".$hotel->{'shortDescription'}."\" ";
+			if ($hotel->{'shortDescription'}) $output.= "; dc:description \"".str_replace($search, $replace, $hotel->{'shortDescription'})."\" ";
 			if ($hotel->{'highRate'}) $output.= "; iwa:highRate \"".$hotel->{'highRate'}."\" ";
 			if ($hotel->{'lowRate'}) $output.= "; iwa:lowRate \"".$hotel->{'lowRate'}."\" ";
 			$output.= ". ";
 		}
-		
+
 		return $output;
 	}
 
