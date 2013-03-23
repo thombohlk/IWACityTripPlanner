@@ -27,7 +27,7 @@
 	print json_encode($result);;
 	
 	
-	
+	// TODO: add start and end date;
 	function getHotelList($city) {
 		$ip = $_SERVER['REMOTE_ADDR'];
 		
@@ -48,7 +48,7 @@
 			'numberOfResults' => '1000',
 			'supplierCacheTolerance' => 'MED_ENHANCED'
 		));
-
+		
 		// Perform curl command
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);

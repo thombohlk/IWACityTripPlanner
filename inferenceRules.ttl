@@ -1,0 +1,138 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix iwa: <http://example.org/iwa/> .
+@prefix ah: <http://purl.org/artsholland/1.0/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+
+iwa:sameCityAs			a			owl:SymmetricProperty .
+
+foaf:homepage  			rdf:type  		owl:InverseFunctionalProperty .
+
+iwa:eventGenre      		owl:propertyChainAxiom  ( ah:venue ah:venueType ) . 
+
+iwa:OutdoorEvent    		a                       owl:Class ;
+                    		rdfs:subClassOf         ah:Event ;
+                    		owl:onProperty          iwa:eventGenre ;
+				owl:someValuesFrom	iwa:OutdoorEventGenre .                    
+
+ah:GenreMarket 			a			iwa:OutdoorEventGenre .
+ah:GenreTour 			a			iwa:OutdoorEventGenre .
+ah:GenreSports 			a			iwa:OutdoorEventGenre .
+ah:GenreGuidedtour 		a			iwa:OutdoorEventGenre .
+ah:GenreWalk 			a			iwa:OutdoorEventGenre .
+ah:GenreOutdoorexhibition 	a			iwa:OutdoorEventGenre .
+ah:VenueTypeOutdoorlocation  	a			iwa:OutdoorEventGenre .
+
+
+iwa:TheaterEvent   		a                       owl:Class ;
+                   		rdfs:subClassOf         ah:Event ;
+                   		owl:onProperty          iwa:eventGenre ;
+				owl:someValuesFrom	iwa:TheaterEventGenre .                    
+                    
+ah:GenreCabaret 		a			iwa:TheaterEventGenre .
+ah:GenreMusictheater 		a			iwa:TheaterEventGenre .
+ah:GenrePlay 			a			iwa:TheaterEventGenre .
+ah:GenreMime 			a			iwa:TheaterEventGenre .
+ah:GenreMusical 		a			iwa:TheaterEventGenre .
+ah:GenreCircus 			a			iwa:TheaterEventGenre .
+ah:GenreOpera 			a			iwa:TheaterEventGenre .
+ah:GenreBallet 			a			iwa:TheaterEventGenre .
+ah:GenrePuppet 			a			iwa:TheaterEventGenre .
+ah:GenreShow 			a			iwa:TheaterEventGenre .
+ah:VenueTypeTheater 		a			iwa:TheaterEventGenre .
+	
+iwa:MuseumEvent    		a                       owl:Class ;
+                   		rdfs:subClassOf         ah:Event ;
+                   		owl:onProperty          iwa:eventGenre ;
+				owl:someValuesFrom	iwa:MuseumEventGenre .                    
+
+ah:GenreMuseum 			a			iwa:MuseumEventGenre .  
+ah:GenreGuidedtour 		a			iwa:MuseumEventGenre .
+ah:VenueTypeMuseum 		a			iwa:MuseumEventGenre .
+
+iwa:GalleryEvent    		a                       owl:Class ;
+	                    	rdfs:subClassOf         ah:Event ;
+	                    	owl:onProperty          iwa:eventGenre ;
+				owl:someValuesFrom	iwa:GalleryEventGenre .  
+
+ah:GenreGallery 		a			iwa:GalleryEventGenre .
+ah:GenreExhibition 		a			iwa:GalleryEventGenre .
+ah:GenreOutdoorexhibition 	a			iwa:GalleryEventGenre .
+ah:VenueTypeGallery 		a			iwa:GalleryEventGenre .
+
+iwa:CinemaEvent     		a                       owl:Class ;
+                   		rdfs:subClassOf         ah:Event ;
+                   		owl:onProperty          iwa:eventGenre ;
+				owl:someValuesFrom	iwa:CinemaEventGenre .  
+                    		
+ah:GenreMovie 			a			iwa:CinemaEventGenre . 
+ah:GenreDocumentary 		a			iwa:CinemaEventGenre . 
+ah:VenueTypeCinema 		a			iwa:CinemaEventGenre . 
+
+iwa:ArchitectureEvent  		a                    	owl:Class ;
+                    		rdfs:subClassOf         ah:Event ;
+                    		owl:onProperty          iwa:eventGenre ;
+                    		owl:someValuesFrom	iwa:ArchitectureEventGenre .
+
+ah:GenreGuidedtour 		a			iwa:ArchitectureEventGenre .
+ah:VenueTypeArchitecture 	a			iwa:ArchitectureEventGenre .
+
+iwa:DanceEvent      		a                       owl:Class ;
+                    		rdfs:subClassOf         ah:Event ;
+                    		owl:onProperty          iwa:eventGenre ;
+				owl:someValuesFrom	iwa:DanceEventGenre .
+
+ah:GenreModerndance 		a			iwa:DanceEventGenre .
+ah:GenreNonwesterndance 	a			iwa:DanceEventGenre .
+ah:GenreDance 			a			iwa:DanceEventGenre .
+ah:VenueTypeDance 		a			iwa:DanceEventGenre .
+
+iwa:MusicEvent      		a                       owl:Class ;
+                   		rdfs:subClassOf         ah:Event ;
+                 		owl:onProperty          iwa:eventGenre ;
+                    		owl:someValuesFrom	iwa:MusicEventGenre .
+
+ah:GenreMusictheater 		a			iwa:MusicEventGenre .
+ah:GenrePopmusic 		a			iwa:MusicEventGenre .
+ah:GenreJazz 			a			iwa:MusicEventGenre .
+ah:GenreClassicalmusic 		a			iwa:MusicEventGenre .
+ah:GenreWorldmusic 		a			iwa:MusicEventGenre .
+ah:GenreOpera 			a			iwa:MusicEventGenre .
+ah:GenreModernmusic 		a			iwa:MusicEventGenre .
+ah:VenueTypeMusic 		a			iwa:MusicEventGenre .
+
+iwa:OtherEvent      		a                       owl:Class ;
+                    		rdfs:subClassOf         ah:Event ;
+                   	 	owl:onProperty          iwa:eventGenre ;
+				owl:someValuesFrom	iwa:OtherEventGenre .
+
+ah:GenreOther 			a			iwa:OtherEventGenre .
+ah:GenreFestival 		a			iwa:OtherEventGenre .
+ah:GenreLiterature 		a			iwa:OtherEventGenre .
+ah:GenreYouth 			a			iwa:OtherEventGenre .
+ah:GenreReading 		a			iwa:OtherEventGenre .
+ah:GenreOpenday 		a			iwa:OtherEventGenre .
+ah:GenreDebate 			a			iwa:OtherEventGenre .
+ah:GenreTradeshow 		a			iwa:OtherEventGenre .
+ah:GenreOpening 		a			iwa:OtherEventGenre .
+ah:GenreCulinary 		a			iwa:OtherEventGenre .
+ah:GenreFolklore 		a			iwa:OtherEventGenre .
+ah:GenreWorkshop 		a			iwa:OtherEventGenre .
+ah:GenreProcession 		a			iwa:OtherEventGenre .
+ah:GenreFair 			a			iwa:OtherEventGenre .
+ah:GenreCruise 			a			iwa:OtherEventGenre .
+
+iwa:LandmarkEvent   		a                       owl:Class ;
+                   	 	rdfs:subClassOf         ah:Event ;
+                    		owl:onProperty          iwa:eventGenre ;
+				owl:someValuesFrom	iwa:LandmarkEventGenre .
+
+ah:VenueTypeLandmark 		a			iwa:LandmarkEventGenre .
+
+iwa:HotelEvent      		a                       owl:Class ;
+                    		rdfs:subClassOf         ah:Event ;
+                    		owl:onProperty          iwa:eventGenre ;
+				owl:someValuesFrom	iwa:HotelEventGenre .
+                    		
+ah:VenueTypeHotel 		a			iwa:HotelEventGenre .  

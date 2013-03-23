@@ -19,6 +19,20 @@ $prefixes = "PREFIX ah: <http://purl.org/artsholland/1.0/>
 		PREFIX gr: <http://purl.org/goodrelations/v1#>
 		PREFIX gn: <http://www.geonames.org/ontology#>";
 
+function makeSameCityInsert() {
+    global $prefixes;
+
+    $query = $prefixes."
+	INSERT {
+	    ?a iwa:sameCityAs ?b .
+	} WHERE {
+	    ?a geo:city ?city .
+	    ?b geo:city ?city .
+	}";
+
+    return $query;
+}
+
 // Foursquare venue query
 function makeVenueQuery($name, $location) {
 	global $prefixes;
@@ -50,7 +64,7 @@ function makeArtsHollandQuery($name, $location, $activityType, $startDate, $endD
 
 	$query = $prefixes."		
 
-		SELECT DISTINCT ?event ?venueTitle ?title ?lat ?lng ?start ?end ?id ?venueId ?sameAsVenueId ?description WHERE {
+		SELECT DISTINCT ?event ?venueTitle ?title ?lat ?lng ?start ?end ?id ?venueId ?sameAsVenueId ?description ?location WHERE {
 			?event a ah:Event .
 			?event ah:venue ?venue .
 			?event time:hasBeginning ?start .
@@ -64,9 +78,9 @@ function makeArtsHollandQuery($name, $location, $activityType, $startDate, $endD
 			?venue geo:lat ?lat .
 			?venue geo:long ?lng .
 			OPTIONAL { ?venue owl:sameAs ?sameAs .
-			?sameAs iwa:id ?sameAsVenueId .
-			?venue ah:locationAddress ?locAdd . }
-			?locAdd vcard:locality ?locatie . 
+			?sameAs iwa:id ?sameAsVenueId . }
+			?venue ah:locationAddress ?locAdd . 
+			?locAdd vcard:locality ?location . 
 		";
 
 	// Depending on the availebility of $name and $location, a combination of filters is added.
@@ -74,11 +88,11 @@ function makeArtsHollandQuery($name, $location, $activityType, $startDate, $endD
 		$query .= "FILTER (regex(str(?title), '$name', 'i') || regex(str(?venueTitle), '$name', 'i')) . 
 			";
 	} else if ($name == "" && $location != "") {
-		$query .= "FILTER (regex(str(?venueTitle), '$location', 'i') || regex(str(?locatie), '$location', 'i')) . 
+		$query .= "FILTER (regex(str(?venueTitle), '$location', 'i') || regex(str(?location), '$location', 'i')) . 
 			";
 	} else if ($name != "" && $location != "") {
-		$query .= "FILTER ((regex(str(?venueTitle), '$name', 'i') && regex(str(?locatie), '$location', 'i')) ||
-							(regex(str(?title), '$name', 'i') && regex(str(?locatie), '$location', 'i')) ||
+		$query .= "FILTER ((regex(str(?venueTitle), '$name', 'i') && regex(str(?location), '$location', 'i')) ||
+							(regex(str(?title), '$name', 'i') && regex(str(?location), '$location', 'i')) ||
 							(regex(str(?title), '$name', 'i') && regex(str(?venueTitle), '$location', 'i'))) . 
 			";
 	}
@@ -88,7 +102,8 @@ function makeArtsHollandQuery($name, $location, $activityType, $startDate, $endD
 	if ($endDate != "") $query .= "FILTER (xsd:dateTime(?end) <= \"$endDate\"^^xsd:dateTime) . ";
 	
 	// Set filter for activity type if present.
-	if ($activityType != "NoPref") $query .= "?event iwa:eventType ah:VenueType".$activityType." .	";
+	//if ($activityType != "NoPref") $query .= "?event iwa:eventType ah:VenueType".$activityType." .	";
+	if ($activityType != "NoPref") $query .= "?event a iwa:".$activityType."Event .	";
 
 	$query .= "} LIMIT 100";
 
@@ -111,16 +126,19 @@ function makeArtsHollandConstruct($name, $location, $activityType) {
 			?Event iwa:id ?EventId . 
 			?Event time:hasEnd ?End .
 			?Event dc:description ?description .
+			?Event iwa:eventGenre ?EventGenre .
 			?Venue dc:title ?VenueTitle .
 			?Venue iwa:id ?VenueId .
 			?Venue geo:lat ?Lat .
 			?Venue geo:long ?Long .
+			?Venue geo:city ?Locality .
 			?Venue ah:venueType ?VenueType .
 			?Venue foaf:homepage ?Homepage .
 			?Venue ah:locationAddress ?LocAddr .
 			?LocAddr vcard:locality ?Locality .
 			?LocAddr vcard:postal-code ?PostalCode .
 			?LocAddr vcard:street-address ?Address .	
+
 		} WHERE { {
 				?Event a ah:Event .
 				?Event ah:cidn ?EventId .
@@ -128,6 +146,8 @@ function makeArtsHollandConstruct($name, $location, $activityType) {
 				?Event dc:title ?EventTitle .
 				?Event time:hasBeginning ?Start .
 				?Event time:hasEnd ?End .
+				?Event ah:production ?Production .
+				?Production ah:genre ?EventGenre .
 				OPTIONAL { ?Event dc:description ?description . }
 				?Venue dc:title ?VenueTitle .
 				?Venue ah:cidn ?VenueId .
@@ -166,6 +186,7 @@ function makeArtsHollandConstruct($name, $location, $activityType) {
 				?Event time:hasEnd ?End .
 				?Event ah:production ?Production .
 				?Production dc:title ?EventTitle .
+				?Production ah:genre ?EventGenre .
 				OPTIONAL { ?Production dc:description ?description . }
 				?Venue dc:title ?VenueTitle .
 				?Venue ah:cidn ?VenueId .
@@ -180,7 +201,7 @@ function makeArtsHollandConstruct($name, $location, $activityType) {
 				?LocAddr vcard:street-address ?Address .	
 		";
 
-	// Depending on the availebility of $name and $location, a combination of filters is added.
+	// Depending on the availability of $name and $location, a combination of filters is added.
 	if ($name != "" && $location == "") {
 		$query .= "FILTER (regex(str(?EventTitle), '$name', 'i') || regex(str(?VenueTitle), '$name', 'i')) . 
 			";
@@ -214,7 +235,6 @@ function makeHotelQuery($location, $name, $startDate, $endDate) {
 			?hotel geo:long ?lng .
 			?hotel geo:city ?city .
 			?hotel iwa:id ?id .
-			OPTIONAL { ?hotel geo:city ?city . } .
 			OPTIONAL { ?hotel iwa:Address ?address . } .
 			OPTIONAL { ?hotel iwa:rating ?hotelRating . } .
 			OPTIONAL { ?hotel dc:description ?shortDescription . } .
@@ -229,8 +249,50 @@ function makeHotelQuery($location, $name, $startDate, $endDate) {
 	// Set filter for name if present.
 	if ($name != '') $query .= "FILTER regex(str(?title), '$name', 'i') .";
 
-	$query .= "} LIMIT 1000";
+	$query .= "} LIMIT 100";
 
+	return $query;
+}
+
+// Query for retreiving hotel RDF data from Sesame endpoint from hotels that are in the same city as $id.
+function makeHotelInSameCityQuery($id) {
+	global $prefixes;
+
+	// Create query
+	$query = $prefixes."
+
+		SELECT ?hotel ?title ?lat ?lng ?city ?id ?city ?address ?hotelRating ?shortDescription ?highRate ?lowRate WHERE {{
+			?venue iwa:id \"$id\" .
+			?venue iwa:sameCityAs ?hotel .
+			?hotel a iwa:Hotel .
+			?hotel dc:title ?title .
+			FILTER ( lang(?title) = 'nl' ) .
+			?hotel geo:lat ?lat .
+			?hotel geo:long ?lng .
+			?hotel geo:city ?city .
+			?hotel iwa:id ?id .
+			OPTIONAL { ?hotel iwa:Address ?address . } .
+			OPTIONAL { ?hotel iwa:rating ?hotelRating . } .
+			OPTIONAL { ?hotel dc:description ?shortDescription . } .
+			OPTIONAL { ?hotel iwa:highRate ?highRate . } .
+			OPTIONAL { ?hotel iwa:lowRate ?lowRate . } .
+		} UNION {
+			?venue iwa:id \"$id\"^^xsd:string .
+			?venue iwa:sameCityAs ?hotel .
+			?hotel a iwa:Hotel .
+			?hotel dc:title ?title .
+			FILTER ( lang(?title) = 'nl' ) .
+			?hotel geo:lat ?lat .
+			?hotel geo:long ?lng .
+			?hotel geo:city ?city .
+			?hotel iwa:id ?id .
+			OPTIONAL { ?hotel iwa:Address ?address . } .
+			OPTIONAL { ?hotel iwa:rating ?hotelRating . } .
+			OPTIONAL { ?hotel dc:description ?shortDescription . } .
+			OPTIONAL { ?hotel iwa:highRate ?highRate . } .
+			OPTIONAL { ?hotel iwa:lowRate ?lowRate . } .
+		} } LIMIT 100";
+		
 	return $query;
 }
 
@@ -241,7 +303,7 @@ function makeSearchActivityQuery($id) {
 	// Create query
 	$query = $prefixes."
 
-		SELECT DISTINCT ?event ?title ?eventTitle ?lat ?lng ?start ?end ?id ?sameAsId WHERE {
+		SELECT DISTINCT ?event ?title ?eventTitle ?lat ?lng ?start ?end ?id ?sameAsId ?city WHERE {
 			?place iwa:id \"$id\" .
 			?event a ah:Event .
 			?event ah:venue ?place .
@@ -251,6 +313,7 @@ function makeSearchActivityQuery($id) {
 			?event iwa:id ?id . 
 			?place geo:lat ?lat .
 			?place geo:long ?lng .
+			?place geo:city ?city .
 			OPTIONAL { ?place owl:sameAs ?sameAs .
 			?sameAs iwa:id ?sameAsId . }
 		} LIMIT 100";
@@ -278,6 +341,7 @@ function makeArtsHollandVenueConstruct($id, $homepage) {
 			?Event iwa:id ?EventId . 
 			?Event time:hasEnd ?End .
 			?Event dc:description ?description .
+			?Event iwa:eventGenre ?EventGenre .
 			?Venue dc:title ?VenueTitle .
 			?Venue iwa:id ?VenueId .
 			?Venue geo:lat ?Lat .
@@ -295,6 +359,8 @@ function makeArtsHollandVenueConstruct($id, $homepage) {
 				?Event time:hasBeginning ?Start .
 				?Event time:hasEnd ?End .
 				?Event dc:title ?EventTitle .
+				?Event ah:production ?Production .
+				?Production ah:genre ?EventGenre .
 				?Venue dc:title ?VenueTitle .
 				?Venue ah:cidn ?VenueId .
 				FILTER ( lang(?VenueTitle) = 'nl' ) .
@@ -312,6 +378,7 @@ function makeArtsHollandVenueConstruct($id, $homepage) {
 				?Event time:hasBeginning ?Start .
 				?Event time:hasEnd ?End .
 				?Event ah:production ?Production .
+				?Production ah:genre ?EventGenre .
 				?Production dc:title ?EventTitle .
 				?Venue dc:title ?VenueTitle .
 				?Venue ah:cidn ?VenueId .

@@ -1,0 +1,58 @@
+Outdoor location
+Theater
+Museum
+Gallery
+Cinema
+Architecture
+Landmark
+Dance
+Hotel
+Music
+Other
+
+----
+
+Cabaret		2
+Musictheater	2 10
+Popmusic	10
+Other		11
+Jazz		10
+Play		2
+Moderndance	8
+Mime		2
+Classicalmusic	10
+Worldmusic	10
+Documentary	5
+Nonwesterndance	8
+Movie		5
+Musical		2
+Circus		2
+Festival	11
+Literature	11
+Youth		11
+Dance		5
+Reading		11
+Openday		11
+Market		1
+Opera		2 10
+Debate		11
+Gallery		4
+Ballet		2
+Tradeshow	11
+Museum		3
+Exhibition	4
+Tour		1
+Puppet		2
+Sports		1
+Opening		11
+Modernmusic	10
+Culinary	11
+Guidedtour	1 3 6
+Folklore	11
+Show		2
+Walk		1
+Workshop	11
+Outdoorexh	1 4
+Procession	11
+Fair		11
+Cruise		11

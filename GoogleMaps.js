@@ -2,11 +2,15 @@ var directionsDisplay;
 var directionsService;
 var map;
 var currentMarkers = [];
-var pinImage;
-var pinImageHighlight;
+var venuePinImage;
+var venuePinImageHighlight;
+var activityPinImage;
+var activityPinImageHighlight;
+var hotelPinImage;
+var hotelPinImageHighlight;
 var infowindow;
 
-// Initialize map with proper settings and create standard object such as pinImage.
+// Initialize map with proper settings and create standard object such as venuePinImage.
 function initializeMap() {
 	directionsService = new google.maps.DirectionsService();
 	directionsDisplay = new google.maps.DirectionsRenderer();
@@ -29,8 +33,12 @@ function initializeMap() {
 		document.getElementById("map_canvas").style.position = "static";
     });
 	
-    pinImage = new google.maps.MarkerImage("http://maps.google.com/intl/en_us/mapfiles/ms/micons/red.png", null, null, null, new google.maps.Size(32, 32))
-    pinImageHighlight = new google.maps.MarkerImage("http://maps.google.com/intl/en_us/mapfiles/ms/micons/blue.png", null, null, null, new google.maps.Size(32, 32));
+    venuePinImage = new google.maps.MarkerImage("http://maps.google.com/mapfiles/markerV.png", null, null, null, new google.maps.Size(20, 34))
+    venuePinImageHighlight = new google.maps.MarkerImage("http://maps.google.com/mapfiles/marker_yellowV.png", null, null, null, new google.maps.Size(20, 34));
+    activityPinImage = new google.maps.MarkerImage("http://maps.google.com/mapfiles/markerA.png", null, null, null, new google.maps.Size(20, 34))
+    activityPinImageHighlight = new google.maps.MarkerImage("http://maps.google.com/mapfiles/marker_yellowA.png", null, null, null, new google.maps.Size(20, 34));
+    hotelPinImage = new google.maps.MarkerImage("http://maps.google.com/mapfiles/ms/micons/lodging.png", null, null, null, new google.maps.Size(32, 32))
+    hotelPinImageHighlight = new google.maps.MarkerImage("http://maps.google.com/mapfiles/arrow.png", null, null, null, new google.maps.Size(39, 34));
     infowindow = new google.maps.InfoWindow();
     directionsDisplay.setMap(map);
 };
@@ -41,7 +49,7 @@ function setVenueMarker(venue) {
     var marker = new google.maps.Marker({
 		position: positionMarker,
 		map: map,
-		icon: pinImage,
+		icon: venuePinImage,
 		title: venue['title']['value']
     });
 
@@ -52,6 +60,7 @@ function setVenueMarker(venue) {
 	"<br />City: " + venue['city']['value'];
 
     marker.set("id", id);
+    marker.set("type", "venue");
     makeInfoWindowEvent(map, infowindow, text, marker);
 
     currentMarkers.push(marker);
@@ -63,11 +72,10 @@ function setActivityMarker(activity) {
     var marker = new google.maps.Marker({
 		position: positionMarker,
 		map: map,
-		icon: pinImage,
+		icon: activityPinImage,
 		title: activity['title']['value']
     });
 
-    //TODO: Add id
     var id = activity['id']['value'];
     var text = "<b>" + activity['title']['value'] + "</b>";
 	if (activity['start']) text+= "<br />Start: " + activity['start']['value'].replace("Z", "").replace("T", " ");
@@ -75,6 +83,7 @@ function setActivityMarker(activity) {
 	if (activity['description']) text+= "<br />" + activity['description']['value'];
 
     marker.set("id", id);
+    marker.set("type", "activity");
     makeInfoWindowEvent(map, infowindow, text, marker);
 
     currentMarkers.push(marker);
@@ -86,7 +95,7 @@ function setHotelMarker(hotel) {
     var marker = new google.maps.Marker({
 		position: positionMarker,
 		map: map,
-		icon: pinImage,
+		icon: hotelPinImage,
 		title: hotel['title']['value']
     });
 
@@ -99,6 +108,7 @@ function setHotelMarker(hotel) {
 	if (hotel['shortDescription']) text+= "<br />" + hotel['shortDescription']['value'];
 
     marker.set("id", id);
+    marker.set("type", "hotel");
     makeInfoWindowEvent(map, infowindow, text, marker);
 
     currentMarkers.push(marker);
@@ -121,13 +131,39 @@ function goToLocation(e) {
     if (e.data.zoom) map.setZoom(18);
 };
 
+function findIcon(markerType, iconType) {
+    if (markerType == "venue") {
+		if (iconType == "highlight") {
+			return venuePinImageHighlight;
+		} else if (iconType == "normal") {
+			return venuePinImage;
+		}
+    } else if (markerType == "activity") {
+		if (iconType == "highlight") {
+			return activityPinImageHighlight;
+		} else if (iconType == "normal") {
+			return activityPinImage;
+		}
+    } else if (markerType == "hotel") {
+		if (iconType == "highlight") {
+			return hotelPinImageHighlight;
+		} else if (iconType == "normal") {
+			return hotelPinImage;
+		}
+    } else {
+		setMessage("Unexpected pin image type error", true);
+    }
+}
+
 function highlightMarker(id) {
     for (var i = 0; i < currentMarkers.length; i++) {
 		var idToFind = currentMarkers[i].get("id");
 		if (id == idToFind) {
-			currentMarkers[i].setIcon(pinImageHighlight);
+		    var highlightIcon = findIcon(currentMarkers[i].get("type"), "highlight");
+		    currentMarkers[i].setIcon(highlightIcon);
 		} else {
-			currentMarkers[i].setIcon(pinImage);
+		    var normalIcon = findIcon(currentMarkers[i].get("type"), "normal");
+		    currentMarkers[i].setIcon(normalIcon);
 		}
     }
 }
@@ -137,8 +173,8 @@ function setMarkerIcon(e) {
     for (var i = 0; i < currentMarkers.length; i++) {
 		var id = currentMarkers[i].get("id");
 		if (id == e.data.id) {
-			if (e.data.markerIcon == "highlight") currentMarkers[i].setIcon(pinImageHighlight);
-			if (e.data.markerIcon == "regular") currentMarkers[i].setIcon(pinImage);
+			if (e.data.markerIcon == "highlight") currentMarkers[i].setIcon(venuePinImageHighlight);
+			if (e.data.markerIcon == "regular") currentMarkers[i].setIcon(venuePinImage);
 		}
     }
 };

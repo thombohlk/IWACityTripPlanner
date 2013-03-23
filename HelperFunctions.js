@@ -1,3 +1,5 @@
+
+// Show or hide input fields according to the value set for search type.
 function updateInputFields() {
 	var searchType = $( "#searchType" ).val();
 
@@ -18,6 +20,7 @@ function updateInputFields() {
 	}
 }
 
+// Add datepickers to the start date and end date field.
 $(function() { 
 	$( "#startdatepicker" ).datepicker({
 		dateFormat: 'dd-mm-yy',
@@ -44,6 +47,8 @@ $(function() {
 	},
 	$.datepicker.regional['nl']);
 	});
+
+// Adds all jQuery functions to setup the draggabillity and sortabillity of result items.
 $(function () {
 	$('.result').draggable({
 		appendTo: 'body',
@@ -72,18 +77,33 @@ $(function () {
 			var text = id;
 			for (var i = 0; i < resultList.length; i++) {
 				if (resultList[i]['id'] && id == resultList[i]['id']['value']) {
-					console.log(resultList[i]);
-					text = '<b>' + resultList[i]['title']['value'] + '</b>';
-					if (resultList[i]['city']) text+= '<br />' + resultList[i]['city']['value'];
-					if (resultList[i]['start']) text+= '<br />' + resultList[i]['start']['value'].replace("Z", "").replace("T", " ");
-					if (resultList[i]['end']) text+= '<br />' + resultList[i]['end']['value'].replace("Z", "").replace("T", " ");
+					var result = resultList[i];
+					var listItem;
 
-					var $li = $('<div class="timelineItem" >').html(text);
-					if (resultList[i]['type']['value'] == 'hotel') $li.addClass("hotelItem");
-					if (resultList[i]['type']['value'] == 'venue') $li.addClass("venueItem");
-					if (resultList[i]['type']['value'] == 'activity') $li.addClass("activityItem");
-					$li.attr('id', id);
-					$li.appendTo(this);
+					text = '<b>' + result['title']['value'] + '</b>';
+					if (result['city']) text+= '<br />' + result['city']['value'];
+					if (result['start']) text+= '<br />' + result['start']['value'].replace("Z", "").replace("T", " ");
+					if (result['end']) text+= '<br />' + result['end']['value'].replace("Z", "").replace("T", " ");
+
+					// Hotel
+					if (result['lowRate']) text+= "<br /><i>Lowest rate:</i> &#8364; " + Math.round(result['lowRate']['value'] * 100) / 100;
+					if (result['highRate']) text+= "<br /><i>Highest rate:</i> &#8364; " + Math.round(result['highRate']['value'] * 100) / 100;
+					if (result['hotelRating']) text+= "<br />" + result['hotelRating']['value']+" stars out of 5";
+
+					listItem = $('<div class="timelineItem" >').html(text);
+
+					if (result['type']['value'] == 'hotel') {
+						listItem.addClass("hotelItem");
+					} else if (result['type']['value'] == 'venue') {
+						addButtonsToItem(listItem, result, false, true);
+						listItem.addClass("venueItem");
+					} else if (result['type']['value'] == 'activity') {
+						addButtonsToItem(listItem, result, false, true);
+						listItem.addClass("activityItem");
+					}
+
+					listItem.attr('id', id);
+					listItem.appendTo(this);
 					moveItemToTimelineList(id);
 					calcRoute();
 				}
@@ -94,27 +114,13 @@ $(function () {
 		accept: ".timeline div",
 		activeClass: "trashcanActive",
 		drop: function(ev, ui) {
-		    ui.draggable.remove();
+			ui.draggable.remove();
 			removeItemFromTimeline(ui.draggable.prop('id'));
-	}
-});
+		}
+	});
 });
 
-function resetRepository() {
-	$("body").addClass("loading");
-	$.getJSON('SesameCallHandler.php', {
-			"call": "reset"
-			})
-            .success( function(data) {
-                $("body").removeClass("loading");
-                setMessage("Starting with a clean sheet.", false);
-            })
-            .error( function(error) {
-                $("body").removeClass("loading");
-                setMessage(error.statusText, true);
-            });  
-}
-
+// Scales some of the divs on the page to ensure a correct presentation.
 function scaleWindow() {
 	document.getElementById("resultListBox").style.height = (window.innerHeight - document.getElementById("timelineBox").offsetHeight - 80) + "px";
 	document.getElementById("map_canvas").style.height = (window.innerHeight - document.getElementById("timelineBox").offsetHeight) + "px";
@@ -122,6 +128,7 @@ function scaleWindow() {
 	document.getElementById("resultList").style.height = (document.getElementById("resultListBox").offsetHeight - 26 - 16) + "px";
 }
 
+// Calls scaleWindow() when the page is loaded.
 window.onresize = function(event) {
 	scaleWindow();
 }

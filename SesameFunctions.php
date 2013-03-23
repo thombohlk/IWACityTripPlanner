@@ -76,12 +76,51 @@
 	function resetRepository() {
 		clearRepository();
 
-		$file = "data/inferenceRules.txt";
+		$file = "inferenceRules.ttl";
 		$fh = fopen($file, 'r');
 		$rules = fread($fh, filesize($file));
 		fclose($fh);
 
 		postData($rules, "application/x-turtle");
+	}
+
+	function insertSameCityTriples() {
+		$query = makeSameCityInsert();
+
+		// Create the url 
+		$baseURL = "http://77.250.167.72:8080/openrdf-sesame/repositories/CityTripPlanner/statements";
+		$params = array(
+			"update" => $query
+		);
+	
+		// Create the url 
+		$header[0] = "Content-Type:application/x-www-form-urlencoded"; 
+		$header[1] = "Accept: */*";
+
+		//set the url, number of POST vars, POST data
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $header); 
+		curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+		curl_setopt($ch, CURLOPT_URL, $baseURL);
+		curl_setopt($ch, CURLOPT_POST, 1);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
+
+		$output = curl_exec($ch);
+		
+		$info = curl_getinfo($ch);
+		$errno = curl_errno($ch);
+
+		if( $output === false) {
+			header("HTTP/1.0 500 Unexpected openRDF-Sesame error.");
+			print "No output was given.";
+			exit();
+		} else if ($info['http_code'] != 204) {
+			header("HTTP/1.0 ".$info['http_code']." ".$errno);
+			print "Get RDF data error http: ".$info['http_code'].", curl error: ".$errno."\n";
+			exit();
+		}
+
+		curl_close($ch);
 	}
 
 	function clearRepository() {

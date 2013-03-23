@@ -1,0 +1,121 @@
+INFERENCING IDEEEN
+------------------
+    
+1) WalkingDistance, DrivingDistance, based on...?
+2) inSameCityAs, baseren op city name, lat, long
+3) inSameArea, baseren op postcode, lat, long
+4) sameAs relaties tussen Foursquare en ArtsHolland
+5) VenueTypes van ArtsHolland koppelen aan producties en user queries
+
+Sesame rules:
+
+@prefix iwa:<http://example.org/iwa/> .
+@prefix ah:<http://purl.org/artsholland/1.0/> .
+@prefix foaf:<http://xmlns.com/foaf/0.1/> .
+
+iwa:eventGenre	    owl:propertyChainAxiom  ( ah:venue ah:venueType ) .
+
+iwa:OutdoorEvent    a			    owl:Class ;
+		    rdfs:subClassOf	    ah:Event ;
+		    owl:onProperty	    iwa:eventGenre ;
+		    owl:hasValue	    ah:GenreMarket ,
+					    ah:GenreTour ,
+					    ah:GenreSports ,
+					    ah:GenreGuidedtour ,
+					    ah:GenreWalk ,
+					    ah:GenreOutdoorexhibition ,
+					    ah:VenueTypeOutdoorlocation .
+
+iwa:TheaterEvent    a			    owl:Class ;
+		    rdfs:subClassOf	    ah:Event ;
+		    owl:onProperty	    iwa:eventGenre ;
+		    owl:hasValue	    ah:GenreCabaret ,
+					    ah:GenreMusictheater ,
+					    ah:GenrePlay ,
+					    ah:GenreMime ,
+					    ah:GenreMusical ,
+					    ah:GenreCircus ,
+					    ah:GenreOpera ,
+					    ah:GenreBallet ,
+					    ah:GenrePuppet ,
+					    ah:GenreShow ,
+					    ah:VenueTypeTheater .
+
+iwa:MuseumEvent	    a			    owl:Class ;
+		    rdfs:subClassOf	    ah:Event ;
+		    owl:onProperty	    iwa:eventGenre ;
+		    owl:hasValue	    ah:GenreMuseum ,
+					    ah:GenreGuidedtour ,
+					    ah:VenueTypeMuseum .
+
+iwa:GalleryEvent    a			    owl:Class ;
+		    rdfs:subClassOf	    ah:Event ;
+		    owl:onProperty	    iwa:eventGenre ;
+		    owl:hasValue	    ah:GenreGallery ,
+					    ah:GenreExhibition ,
+					    ah:GenreOutdoorexhibition ,
+					    ah:VenueTypeGallery .
+
+iwa:CinemaEvent	    a			    owl:Class ;
+		    rdfs:subClassOf	    ah:Event ;
+		    owl:onProperty	    iwa:eventGenre ;
+		    owl:hasValue	    ah:GenreMovie ,
+					    ah:GenreDocumentary ,
+					    ah:VenueTypeCinema .
+
+iwa:ArchitectureEvent  a		    owl:Class ;
+		    rdfs:subClassOf	    ah:Event ;
+		    owl:onProperty	    iwa:eventGenre ;
+		    owl:hasValue	    ah:GenreGuidedtour , 
+					    ah:VenueTypeArchitecture .
+
+iwa:DanceEvent	    a			    owl:Class ;
+		    rdfs:subClassOf	    ah:Event ;
+		    owl:onProperty	    iwa:eventGenre ;
+		    owl:hasValue	    ah:GenreModerndance ,
+					    ah:GenreNonwesterndance ,
+					    ah:GenreDance ,
+					    ah:VenueTypeDance .
+
+iwa:MusicEvent	    a			    owl:Class ;
+		    rdfs:subClassOf	    ah:Event ;
+		    owl:onProperty	    iwa:eventGenre ;
+		    owl:hasValue	    ah:GenreMusictheater ,
+					    ah:GenrePopmusic ,
+					    ah:GenreJazz ,
+					    ah:GenreClassicalmusic ,
+					    ah:GenreWorldmusic ,
+					    ah:GenreOpera ,
+					    ah:GenreModernmusic ,
+					    ah:VenueTypeMusic .
+
+iwa:OtherEvent	    a			    owl:Class ;
+		    rdfs:subClassOf	    ah:Event ;
+		    owl:onProperty	    iwa:eventGenre ;
+		    owl:hasValue	    ah:GenreOther ,
+					    ah:GenreFestival ,
+					    ah:GenreLiterature ,
+					    ah:GenreYouth ,
+					    ah:GenreReading ,
+					    ah:GenreOpenday ,
+					    ah:GenreDebate ,
+					    ah:GenreTradeshow ,
+					    ah:GenreOpening ,
+					    ah:GenreCulinary ,
+					    ah:GenreFolklore ,
+					    ah:GenreWorkshop ,
+					    ah:GenreProcession ,
+					    ah:GenreFair ,
+					    ah:GenreCruise .
+
+iwa:LandmarkEvent   a			    owl:Class ;
+		    rdfs:subClassOf	    ah:Event ;
+		    owl:onProperty	    iwa:eventGenre ;
+		    owl:hasValue	    ah:VenueTypeLandmark .
+
+iwa:HotelEvent	    a			    owl:Class ;
+		    rdfs:subClassOf	    ah:Event ;
+		    owl:onProperty	    iwa:eventGenre ;
+		    owl:hasValue	    ah:VenueTypeHotel .
+
+foaf:homepage  rdf:type  owl:InverseFunctionalProperty .
