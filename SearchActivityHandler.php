@@ -3,11 +3,6 @@
 	include("SesameFunctions.php");
 	include("Queries.php");
 
-    // Define global variables for ArtsHolland call
-    $api_key = '9cbce178ed121b61a0797500d62cd440';
-    $endpoint = 'http://api.artsholland.com/sparql';
-    $format = 'applicaton/json';
-
     // Set headers
     header("Cache-Control: no-cache, must-revalidate");
     header("Content-type: application/json");
@@ -16,46 +11,50 @@
 		//Get the variables needed for the foursquare call and check if they are filled
 		$venueId = $_GET['id'];
 		$venueHomepage = $_GET['homepage'];
-			
+		
+		// Check if $venueId has been provided.
 		if ($venueId == null) {
 			header("HTTP/1.0 500 SearchActivityHandler.php: No id provided.");
 			exit();
 		}
 
-		// Create ArtsHolland query, assert results into Sesame
-		$query = makeArtsHollandVenueConstruct($venueId, $venueHomepage);
-		$triples = executeQuery($query, $endpoint);
-//print $triples; exit();
-
-		postData($triples);
+		// Create ArtsHolland query, assert results into Sesame.
+		$construct = createActivityConstructForVenue($venueId, $venueHomepage);
+		$RDFdata = performArtsHollandConstruct($construct);
+		postRDFtoSesame($RDFdata);
 		
-		// Query Sesame 
+		// Create Sesame query for retrieving activity data, execute it and decode data.
 		$sesamequery = makeSearchActivityQuery($venueId);
-		
-		$json = json_decode(getRDFData($sesamequery));
+		$json = json_decode(getRDFfromSesame($sesamequery));
 		$result = $json->{'results'}->{'bindings'};
-//print json_encode($result); exit();
+
 		// Return data as JSON object
 		print json_encode($result);
 		
     } catch (Exception $e) {
         header("HTTP/1.0 500 Unexpected server error.");	
-	    print $e->getMessage();
+	    print "Unexpected server error: ".$e->getMessage();
         exit();
     }
 
-	function executeQuery($query, $baseURL) {
-		global $api_key;
-		$params=array(
-			"query" =>  $query,
+	// Performs ArtsHolland call to retrieve RDF data from $construct.
+	function performArtsHollandConstruct($construct) {
+		// Define global variables for ArtsHolland call
+		$api_key = '9cbce178ed121b61a0797500d62cd440';
+		$baseURL = 'http://api.artsholland.com/sparql';
+		$format = 'application/sparql-results+json';
+		
+		// Define parameters.
+		$params = array(
+			"query" =>  $construct,
 			"api_key" => $api_key
 		);
 
-		// Create the url 
+		// Create the URL including parameters and header.
 		$url = $baseURL.'?'.http_build_query($params);
-		$header[0] = "Accept: application/sparql-results+json"; 
+		$header[0] = "Accept: ".$format; 
 
-		// Perform curl command
+		// Setup curl call.
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
@@ -64,12 +63,13 @@
 		curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 		curl_setopt($ch, CURLOPT_URL, $url);;
 
+		// Perform curl call and decode output.
 		$output = curl_exec($ch);
 		$data = json_decode($output);
 
+		// Check if any errors occured during curl call and print if so.
 		$info = curl_getinfo($ch);
 		$errno = curl_errno($ch);
-
 		if( $output === false) {
 			header("HTTP/1.0 500 Unexpected ArtsHolland server error.");
 			print "No output was given.";
@@ -80,8 +80,11 @@
 
 			exit();
 		}	
-
+		
+		// Close curl call handler.
 		curl_close($ch);
+
+		// Return output.
 		return $output;
 	}
 ?>

@@ -59,7 +59,7 @@ function makeVenueQuery($name, $location) {
 }
 
 // Query for searching activities in Arts Holland repository
-function makeArtsHollandQuery($name, $location, $activityType, $startDate, $endDate) {
+function createActivityQuery($name, $location, $activityType, $startDate, $endDate) {
 	global $prefixes;
 
 	$query = $prefixes."		
@@ -111,7 +111,7 @@ function makeArtsHollandQuery($name, $location, $activityType, $startDate, $endD
 }
 
 // Construct for retreiving RDF data from Arts Holland endpoint.
-function makeArtsHollandConstruct($name, $location, $activityType) {
+function createActivityConstruct($name, $location, $activityType) {
 	global $prefixes;
 
 	/* Create construct with a union. The union is needed as the title of an
@@ -140,26 +140,26 @@ function makeArtsHollandConstruct($name, $location, $activityType) {
 			?LocAddr vcard:street-address ?Address .	
 
 		} WHERE { {
-				?Event a ah:Event .
-				?Event ah:cidn ?EventId .
-				?Event ah:venue ?Venue .
-				?Event dc:title ?EventTitle .
-				?Event time:hasBeginning ?Start .
-				?Event time:hasEnd ?End .
-				?Event ah:production ?Production .
-				?Production ah:genre ?EventGenre .
-				OPTIONAL { ?Event dc:description ?description . }
-				?Venue dc:title ?VenueTitle .
-				?Venue ah:cidn ?VenueId .
-				FILTER ( lang(?VenueTitle) = 'nl' ) .
-				?Venue geo:lat ?Lat .
-				?Venue geo:long ?Long .
-				?Venue ah:venueType ?VenueType .
-				?Venue foaf:homepage ?Homepage . 
-				?Venue ah:locationAddress ?LocAddr .
-				?LocAddr vcard:locality ?Locality .
-				?LocAddr vcard:postal-code ?PostalCode .
-				?LocAddr vcard:street-address ?Address .	
+			?Event a ah:Event .
+			?Event ah:cidn ?EventId .
+			?Event ah:venue ?Venue .
+			?Event dc:title ?EventTitle .
+			?Event time:hasBeginning ?Start .
+			?Event time:hasEnd ?End .
+			?Event ah:production ?Production .
+			?Production ah:genre ?EventGenre .
+			OPTIONAL { ?Event dc:description ?description . }
+			?Venue dc:title ?VenueTitle .
+			?Venue ah:cidn ?VenueId .
+			FILTER ( lang(?VenueTitle) = 'nl' ) .
+			?Venue geo:lat ?Lat .
+			?Venue geo:long ?Long .
+			?Venue ah:venueType ?VenueType .
+			?Venue foaf:homepage ?Homepage . 
+			?Venue ah:locationAddress ?LocAddr .
+			?LocAddr vcard:locality ?Locality .
+			?LocAddr vcard:postal-code ?PostalCode .
+			?LocAddr vcard:street-address ?Address .	
 		";
 
 	// Depending on the availebility of $name and $location, a combination of filters is added.
@@ -255,7 +255,7 @@ function makeHotelQuery($location, $name, $startDate, $endDate) {
 }
 
 // Query for retreiving hotel RDF data from Sesame endpoint from hotels that are in the same city as $id.
-function makeHotelInSameCityQuery($id) {
+function createHotelInSameCityQuery($id) {
 	global $prefixes;
 
 	// Create query
@@ -317,13 +317,14 @@ function makeSearchActivityQuery($id) {
 			OPTIONAL { ?place owl:sameAs ?sameAs .
 			?sameAs iwa:id ?sameAsId . }
 		} LIMIT 100";
+	//print $query; exit();
 
 	return $query;
 }
 
 /* Construct for searching activities taking place at a venue with
 homepage $hompage in Arts Holland endpoint. */
-function makeArtsHollandVenueConstruct($id, $homepage) {
+function createActivityConstructForVenue($id, $homepage) {
 	global $prefixes;
 
 	// Create dummy string for $homepage if it is empty.

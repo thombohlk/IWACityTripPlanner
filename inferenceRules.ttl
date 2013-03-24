@@ -5,11 +5,27 @@
 @prefix ah: <http://purl.org/artsholland/1.0/> .
 @prefix foaf: <http://xmlns.com/foaf/0.1/> .
 
-iwa:sameCityAs			a			owl:SymmetricProperty .
+#####
+## 1. Inferring sameAs relations between venues, based on same website triples.
+#####
 
 foaf:homepage  			rdf:type  		owl:InverseFunctionalProperty .
 
+#####
+## 2. If venue A is in the same city as venue B, then the other way around, as well.
+#####
+
+iwa:sameCityAs			a			owl:SymmetricProperty .
+
+#####
+## 3. Assert the venue type in which an activity takes place to be its event genre as well.
+#####
+
 iwa:eventGenre      		owl:propertyChainAxiom  ( ah:venue ah:venueType ) . 
+
+#####
+## 4. Infer events' genre class memberships based on their other class memberships.
+#####
 
 iwa:OutdoorEvent    		a                       owl:Class ;
                     		rdfs:subClassOf         ah:Event ;
@@ -23,7 +39,6 @@ ah:GenreGuidedtour 		a			iwa:OutdoorEventGenre .
 ah:GenreWalk 			a			iwa:OutdoorEventGenre .
 ah:GenreOutdoorexhibition 	a			iwa:OutdoorEventGenre .
 ah:VenueTypeOutdoorlocation  	a			iwa:OutdoorEventGenre .
-
 
 iwa:TheaterEvent   		a                       owl:Class ;
                    		rdfs:subClassOf         ah:Event ;

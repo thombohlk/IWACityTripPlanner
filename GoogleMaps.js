@@ -10,10 +10,9 @@ var hotelPinImage;
 var hotelPinImageHighlight;
 var infowindow;
 
-// Initialize map with proper settings and create standard object such as venuePinImage.
+// Initialize map with proper settings and create standard objects such as venuePinImage.
 function initializeMap() {
-	directionsService = new google.maps.DirectionsService();
-	directionsDisplay = new google.maps.DirectionsRenderer();
+	// Define map options.
     var mapOptions = {
 		center: new google.maps.LatLng(52.237892,5.349426),
 		zoom: 7,
@@ -26,13 +25,20 @@ function initializeMap() {
 		overviewMapControl: false
     };
 
+	// Create map.
     map = new google.maps.Map(document.getElementById("map_canvas"), mapOptions);
 
+	// Initiate directions services.
+	directionsService = new google.maps.DirectionsService();
+	directionsDisplay = new google.maps.DirectionsRenderer();
+
+	// Set css properties when map is loaded.
     google.maps.event.addListener(map, 'tilesloaded', function(){
 		document.getElementById("map_canvas").zIndex = -1000;
 		document.getElementById("map_canvas").style.position = "static";
     });
 	
+	// Define all markers.
     venuePinImage = new google.maps.MarkerImage("http://maps.google.com/mapfiles/markerV.png", null, null, null, new google.maps.Size(20, 34))
     venuePinImageHighlight = new google.maps.MarkerImage("http://maps.google.com/mapfiles/marker_yellowV.png", null, null, null, new google.maps.Size(20, 34));
     activityPinImage = new google.maps.MarkerImage("http://maps.google.com/mapfiles/markerA.png", null, null, null, new google.maps.Size(20, 34))
@@ -43,7 +49,7 @@ function initializeMap() {
     directionsDisplay.setMap(map);
 };
 
-// Set a marker for a venue and return the id.
+// Set a marker for a venue and insert content.
 function setVenueMarker(venue) {
     var positionMarker = new google.maps.LatLng(venue['lat']['value'], venue['lng']['value']);
     var marker = new google.maps.Marker({
@@ -66,7 +72,7 @@ function setVenueMarker(venue) {
     currentMarkers.push(marker);
 };
 
-// Set a marker for a activity and return the id.
+// Set a marker for a activity and and insert content.
 function setActivityMarker(activity) {
     var positionMarker = new google.maps.LatLng(activity['lat']['value'], activity['lng']['value']);
     var marker = new google.maps.Marker({
@@ -89,7 +95,7 @@ function setActivityMarker(activity) {
     currentMarkers.push(marker);
 };
 
-// Set a marker for a activity and return the id.
+// Set a marker for a activity and insert content.
 function setHotelMarker(hotel) {
     var positionMarker = new google.maps.LatLng(hotel['lat']['value'], hotel['lng']['value']);
     var marker = new google.maps.Marker({
@@ -99,7 +105,6 @@ function setHotelMarker(hotel) {
 		title: hotel['title']['value']
     });
 
-    //TODO: Add id
     var id = hotel['id']['value'];
     var text = "<b>" + hotel['title']['value'] + "</b>";
 	if (hotel['lowRate']) text+= "<br /><i>Lowest rate:</i> &#8364; " + Math.round(hotel['lowRate']['value'] * 100) / 100;
@@ -131,6 +136,7 @@ function goToLocation(e) {
     if (e.data.zoom) map.setZoom(18);
 };
 
+// Finds the corrent icon to correspond with the type of marker.
 function findIcon(markerType, iconType) {
     if (markerType == "venue") {
 		if (iconType == "highlight") {
@@ -155,6 +161,7 @@ function findIcon(markerType, iconType) {
     }
 }
 
+// Finds marker on map corrding to id and highlights it.
 function highlightMarker(id) {
     for (var i = 0; i < currentMarkers.length; i++) {
 		var idToFind = currentMarkers[i].get("id");
@@ -207,38 +214,39 @@ function clearMapMarkers(){
     currentMarkers = [];
 };
 
+// Searches through the items currently present on the timeline and calculates and displays the fastest route.
 function calcRoute() {
 	var waypts = [];
 	var docTimelineItems = document.getElementsByClassName("timelineItem");
 
-	console.log("Calculating route.");
+	// Go through items currently present on the timeline and define start, waypoints and end.
 	for (var i = 0; i < docTimelineItems.length; i++) {
 	    for (var j = 0; j < timelineList.length; j++) {
-		if (docTimelineItems[i].id == timelineList[j]['id']['value']) {
-		    if (i === 0) {
-			var start = new google.maps.LatLng(timelineList[j]['lat']['value'], timelineList[j]['lng']['value']);
-		    } else if (i < docTimelineItems.length-1) {
-			waypts.push({
-			    location: new google.maps.LatLng(timelineList[j]['lat']['value'], timelineList[j]['lng']['value']),
-			    stopover: true
-			});
-		    } else {
-			var end = new google.maps.LatLng(timelineList[j]['lat']['value'], timelineList[j]['lng']['value']);
-		    }
-		}
+			if (docTimelineItems[i].id == timelineList[j]['id']['value']) {
+				if (i === 0) {
+					var start = new google.maps.LatLng(timelineList[j]['lat']['value'], timelineList[j]['lng']['value']);
+				} else if (i < docTimelineItems.length-1) {
+					waypts.push({
+						location: new google.maps.LatLng(timelineList[j]['lat']['value'], timelineList[j]['lng']['value']),
+						stopover: true
+					});
+				} else {
+					var end = new google.maps.LatLng(timelineList[j]['lat']['value'], timelineList[j]['lng']['value']);
+				}
+			}
 	    }
 	}
 	
+	// If there are more then two items on the timeline calculate the route and display it on the map.
 	if (timelineList.length >= 2) {
-		console.log("Timeline list length: "+ timelineList.length);
 		var transitMode = "google.maps.TravelMode."+$("#timelineTravelMode").val();
-
 		var request = {
 			origin:start,
 			destination:end,
 			waypoints: waypts,
 			travelMode: eval("google.maps.TravelMode."+$("#timelineTravelMode").val())
 		};
+
 		directionsService.route(request, function(result, status) {
 			if (status == google.maps.DirectionsStatus.OK) {
 				var totalDist = 0;

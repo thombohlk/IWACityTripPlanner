@@ -3,29 +3,37 @@
 	include("SesameFunctions.php");
 	include("Queries.php");
 
-    //Get the variables needed for the ArtsHolland call and check if they are filled
-	$location = $_GET['location'];
-	$id = $_GET['id'];
+	try {
+		//Get the variables needed for the ArtsHolland call.
+		$location = $_GET['location'];
+		$id = $_GET['id'];
 
-	$hotelList = getHotelList($location);
-	$rdfData = parseJSONtoRDF($hotelList);
-	
-	postData($rdfData, "application/x-turtle");
-	insertSameCityTriples();
+		// Perform call to EAN using $location and parse output to RDF.
+		$data = performEANCall($location);
+		$RDFdata = parseJSONtoRDF($data);
 
-	$sesamequery = makeHotelInSameCityQuery($id);
-	
-	$json = json_decode(getRDFData($sesamequery));
-	
-	$result = $json->{'results'}->{'bindings'};
-	
-	print json_encode($result);
-	
-	
-	
-	function getHotelList($city) {
-		$ip = $_SERVER['REMOTE_ADDR'];
+		// Post RDF data to sesame and perform INSERT to create sameCityAs relations.
+		postRDFtoSesame($RDFdata, "application/x-turtle");
+		insertSameCityTriples();
+
+		// Create query to find hotels in same city as $id, execute it and parse output.
+		$sesamequery = createHotelInSameCityQuery($id);
+		$json = json_decode(getRDFfromSesame($sesamequery));
+		$results = $json->{'results'}->{'bindings'};
+
+		// Return results.
+		print json_encode($results);
 		
+    } catch (Exception $e) {
+        header("HTTP/1.0 500 Unexpected server error.");	
+	    print "Unexpected server error: ".$e->getMessage();
+        exit();
+    }
+	
+	// Perform call to Expedia Affiliate Network for hotels in $city.
+	function performEANCall($city) {
+		// Create URL including user input.
+		$ip = $_SERVER['REMOTE_ADDR'];
 		$url = 'http://api.ean.com/ean-services/rs/hotel/v3/list?'.http_build_query(array(
 			'minorRev' => '1',
 			'cid' => '55505',
@@ -36,15 +44,15 @@
 			'destinationString' => $city,
 			'countryCode' => 'NL',
 			'supplierCacheTolerance' => 'MED',
-			'arrivalDate' => $startDate,
-			'departureDate' => $endDate,
+			'arrivalDate' => "",
+			'departureDate' => "",
 			'room1' => '1,3',
 			'room2' => '1,5',
 			'numberOfResults' => '100',
 			'supplierCacheTolerance' => 'MED_ENHANCED'
 		));
 		
-		// Perform curl command
+		// Setup curl call.
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
@@ -52,8 +60,10 @@
 		curl_setopt($ch, CURLOPT_TIMEOUT, 10);
 		curl_setopt($ch, CURLOPT_URL, $url);
 
+		// Execute curl call.
 		$output = curl_exec($ch);
 
+		// Check if any errors occured during the curl call and execute.
 		$info = curl_getinfo($ch);
 		$errno = curl_errno($ch);
 		if( $output === false) {
@@ -65,26 +75,29 @@
 			print "Error http: ".$info['http_code'].", curl error: ".$errno."\n";
 			exit();
 		}
+
+		// Close curl call handler.
 		curl_close($ch);
 		
+		// Decode and parse output.
 		$data = json_decode($output);
-		$hotelList = $data->{'HotelListResponse'}->{'HotelList'}->{'HotelSummary'};
-//		print $hotelList; exit();
-//		var_dump(json_encode($hotelList)); exit();
-		
-		return $hotelList;
+		$results = $data->{'HotelListResponse'}->{'HotelList'}->{'HotelSummary'};
+
+		// Return results.		
+		return $results;
 	}
 	
 	function parseJSONtoRDF($hotelList, $startDate, $endDate) {
-		$output = '';
-		
-		$output.= "@prefix iwa: <http://example.org/iwa/> . ";
+		// Define prefixes.
+		$output = "@prefix iwa: <http://example.org/iwa/> . ";
 		$output.= "@prefix dc: <http://purl.org/dc/terms/> . ";
 		$output.= "@prefix geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> . ";
 
+		// Create $search and $replace to remove unwanted characters from data.
 		$search = array("'", "\"");
 		$replace = "";
 		
+		// For each result lookup the needed properties and define it in RDF format.
 		foreach ($hotelList as $key => &$hotel) {
 			$output.= "iwa:".$hotel->{'hotelId'}." ";
 			$output.= "rdf:type iwa:Hotel ; ";
@@ -101,6 +114,7 @@
 			$output.= ". ";
 		}
 
+		// Return output.
 		return $output;
 	}
 
