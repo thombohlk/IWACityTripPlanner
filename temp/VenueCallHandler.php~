@@ -1,24 +1,49 @@
 <?php
-	// Include files
+	// Include files.
 	include("SesameFunctions.php");
 	include("Queries.php");
 
-	// Define global variables for foursquare call
+	// Define global variables for foursquare call.
     $client_id = 'PDIS2NTFLWTMYOVHUA3T2FKDEXXJ00FRTBH0H1SZPOASX5OI';
     $client_secret = 'RVTQNR1PO4H0GMSGCAAHVYFRYAM2PMQHASXWSXZWSXWCLFIL';
 	
-    try
-    {
-	//Get the variables needed for the foursquare call and check if they are filled
-	$location = $_GET['location'];
-	$name = $_GET['name'];
+    try {
+		//Get the variables needed for the foursquare call and check if they are filled.
+		$location = $_GET['location'];
+		$name = $_GET['name'];
 		
-	if ($location == '' || $name == '') {
-	    header("HTTP/1.0 500 Name or location is not provided.");
-	    exit();
-        }
+		// Check if either a location or name has been provided.
+		if ($location == '' || $name == '') {
+			header("HTTP/1.0 500 Name or location is not provided.");
+			print "Name or location is not provided.";
+			exit();
+		}
 
-	// Create the url 
+		$venues = performFoursquareCall($name, $location);
+
+		// Parse JSON data to RDF data and assert results into Sesame repository
+		$RDFdata = parseJSONtoRDF($venues);
+		postRDFtoSesame($RDFdata, "application/x-turtle");
+
+		// Query Sesame repository
+		$sesamequery = makeVenueQuery($name, $location); 
+		$json = json_decode(getRDFData($sesamequery));
+		$result = $json->{'results'}->{'bindings'};
+
+		// Return data as JSON object
+		print json_encode($result);
+    } catch (Exception $e) {
+        header("HTTP/1.0 500 Unexpected server error.");
+		print "Unexpected server error: ".$e->getMessage();
+		exit();
+    }
+
+	// Performs Foursquare call for a venue search using the user input.
+	function performFoursquareCall($name, $location) {
+		global $client_id;
+		global $client_secret;
+
+		// Create the url with the needed arguments.
         $url = 'https://api.foursquare.com/v2/venues/search?'.http_build_query(array(
 			'near' => $location,
 			'query' => $name,
@@ -27,7 +52,7 @@
 			'v' => '20130219',
 		));
 
-        // Perform curl command
+        // Setup curl call.
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
@@ -35,9 +60,11 @@
 		curl_setopt($ch, CURLOPT_TIMEOUT, 10);
 		curl_setopt($ch, CURLOPT_URL, $url);
 
+		// Perform curl call and decode output.
 		$output = curl_exec($ch);
 		$data = json_decode($output);
 
+		// Check if any errors occured and display message if so.
 		$info = curl_getinfo($ch);
 		$errno = curl_errno($ch);
 		if( $output === false) {
@@ -67,29 +94,9 @@
 			unset($venue->{'referralId'});
 			unset($venue->{'restricted'});
 		}
-		//print json_encode($venues); exit();
 
-		// Assert results into Sesame repository
-		$triples = parseJSONtoRDF($venues);
-
-		//print $triples; exit();
-		postData($triples, "application/x-turtle");
-
-		// Query Sesame repository
-		$sesamequery = makeVenueQuery($name, $location); 
-		$json = json_decode(getRDFData($sesamequery));
-		$result = $json->{'results'}->{'bindings'};
-
-		// Return data as JSON object
-		print json_encode($result); exit();
-
-    }
-    catch (Exception $e)
-    {
-        header("HTTP/1.0 500 Unexpected server error.");
-		print $e->getMessage();
-		exit();
-    }
+		return $venues;
+	}
 
 
 	function parseJSONtoRDF($venues) {
