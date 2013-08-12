@@ -77,34 +77,8 @@ $(function () {
 			var text = id;
 			for (var i = 0; i < resultList.length; i++) {
 				if (resultList[i]['id'] && id == resultList[i]['id']['value']) {
-					var result = resultList[i];
-					var listItem;
-
-					text = '<b>' + result['title']['value'] + '</b>';
-					if (result['city']) text+= '<br />' + result['city']['value'];
-					if (result['start']) text+= '<br />' + result['start']['value'].replace("Z", "").replace("T", " ");
-					if (result['end']) text+= '<br />' + result['end']['value'].replace("Z", "").replace("T", " ");
-
-					// Hotel
-					if (result['lowRate']) text+= "<br /><i>Lowest rate:</i> &#8364; " + Math.round(result['lowRate']['value'] * 100) / 100;
-					if (result['highRate']) text+= "<br /><i>Highest rate:</i> &#8364; " + Math.round(result['highRate']['value'] * 100) / 100;
-					if (result['hotelRating']) text+= "<br />" + result['hotelRating']['value']+" stars out of 5";
-
-					listItem = $('<div class="timelineItem" >').html(text);
-
-					if (result['type']['value'] == 'hotel') {
-						listItem.addClass("hotelItem");
-					} else if (result['type']['value'] == 'venue') {
-						addButtonsToItem(listItem, result, false, true);
-						listItem.addClass("venueItem");
-					} else if (result['type']['value'] == 'activity') {
-						addButtonsToItem(listItem, result, false, true);
-						listItem.addClass("activityItem");
-					}
-
-					listItem.attr('id', id);
-					listItem.appendTo(this);
-					moveItemToTimelineList(id);
+					addItemToTimeLine(resultList[i]);
+					moveItemToTimelineList(resultList[i]['id']['value']);
 					calcRoute();
 				}
 			}
@@ -132,3 +106,62 @@ function scaleWindow() {
 window.onresize = function(event) {
 	scaleWindow();
 }
+
+$(document).ready(function() {
+	$("#loginForm input:button").click(function() {
+		hideLoginPopup();
+		// Set loading animation
+		$("body").addClass("loading");
+		
+		$.ajax({
+			type: "POST",
+			url: 'Login.php',
+			data: $('#loginForm').serialize(),
+			dataType: 'json',
+			success: function(data) {
+				setMessage("Welcome " + data.name + "!", false);
+				$("#loginButton").addClass("hidden");
+				$("#logoutButton").removeClass("hidden");
+				clearTimeLine();
+				buildTimeLine(data.cityTrip);
+			},
+			statusCode: {
+				403: function(e) {
+					setMessage(e.responseText, true);
+				}
+			},
+			complete: function() {
+				// Remove loading animation
+				$("body").removeClass("loading");
+			}
+		});
+		return false;
+	});
+	
+	
+	$("#signUpForm input:button").click(function() {
+		hideSignUpPopup();
+		// Set loading animation
+		$("body").addClass("loading");
+		
+		$.ajax({
+			type: "POST",
+			url: 'SignUp.php',
+			data: $('#signUpForm').serialize(),
+			dataType: 'json',
+			success: function(data) {
+				setMessage("Welcome " + data.name + "!", false);
+			},
+			statusCode: {
+				403: function(e) {
+					setMessage(e.responseText, true);
+				}
+			},
+			complete: function() {
+				// Remove loading animation
+				$("body").removeClass("loading");
+			}
+		});
+		return false;
+	});
+});

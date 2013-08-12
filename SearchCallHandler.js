@@ -359,6 +359,9 @@ function removeItemFromTimeline(id) {
 			timelineList.splice(i, 1);
 		}
 	}
+	if ($("#timeline") && $("#timeline").children("#"+id)) {
+		$("#timeline").children("#"+id).remove();
+	}
 }
 
 // Display the given message for 5 seconds. If error is true, set the errorMessage class.
@@ -372,6 +375,26 @@ function setMessage(message, error){
 	    $("#message").addClass("hidden");
 		$("#message").removeClass("errorMessage");
     }, 5000);
+}
+
+// Show/hide login popup.
+function showLoginPopup(){
+    $("#loginPopup").removeClass("hidden");
+}
+function hideLoginPopup(){
+    $("#loginPopup").addClass("hidden");
+}
+
+function switchToSignUpPopup() {
+	hideLoginPopup();
+	showSignUpPopup();
+}
+
+function showSignUpPopup() {
+	$("#signUpPopup").removeClass("hidden");
+}
+function hideSignUpPopup() {
+	$("#signUpPopup").addClass("hidden");
 }
 
 // Calls SesameCallHandler to reset the Sesame repository.
@@ -388,4 +411,89 @@ function resetRepository() {
                 $("body").removeClass("loading");
                 setMessage("An error has occured while reseting the repository. Error data: "+error.statusText, true);
             });  
+}
+
+// Calls SaveCityTrip to save the city trip.
+function saveCityTrip() {
+	$("body").addClass("loading");
+	$.post('SaveCityTrip.php', {
+			"cityTripJSON": timelineList
+			})
+            .success( function(data) {
+                $("body").removeClass("loading");
+                setMessage("Trip saved.", false);
+            })
+            .error( function(error) {
+                $("body").removeClass("loading");
+                setMessage("An error has occured while saving your city trip. Error data: "+error.statusText, true);
+            });  
+} 
+
+// Logs out user.
+function logout() {
+	$("body").addClass("loading");
+	$.post('Logout.php')
+            .success( function(data) {
+                $("body").removeClass("loading");
+                setMessage("You are logged out.", false);
+				$("#loginButton").removeClass("hidden");
+				$("#logoutButton").addClass("hidden");
+				clearResultsList();
+				clearTimeLine();
+            })
+            .error( function(error) {
+                $("body").removeClass("loading");
+                setMessage("An error has occured while logging out. Error data: "+error.statusText, true);
+            });  
+} 
+
+// Builds time line items from current items in timelineList.
+function buildTimeLine(data) {
+	if (data) {
+		timelineList = data;
+	}
+	
+	for (var i = 0; i < timelineList.length; i++) {
+		addItemToTimeLine(timelineList[i]);
+	}
+}
+
+function clearTimeLine() {
+	var id = 0;
+	for (var i = 0; i<timelineList.length; i++) {
+		id = timelineList[i]["id"]["value"];
+		if ($("#timeline") && $("#timeline").children("#"+id)) {
+			$("#timeline").children("#"+id).remove();
+		}
+	}
+	timelineList = [];
+}
+
+function addItemToTimeLine(result) {
+	var listItem;
+
+	text = '<b>' + result['title']['value'] + '</b>';
+	if (result['city']) text+= '<br />' + result['city']['value'];
+	if (result['start']) text+= '<br />' + result['start']['value'].replace("Z", "").replace("T", " ");
+	if (result['end']) text+= '<br />' + result['end']['value'].replace("Z", "").replace("T", " ");
+
+	// Hotel
+	if (result['lowRate']) text+= "<br /><i>Lowest rate:</i> &#8364; " + Math.round(result['lowRate']['value'] * 100) / 100;
+	if (result['highRate']) text+= "<br /><i>Highest rate:</i> &#8364; " + Math.round(result['highRate']['value'] * 100) / 100;
+	if (result['hotelRating']) text+= "<br />" + result['hotelRating']['value']+" stars out of 5";
+
+	listItem = $('<div class="timelineItem" >').html(text);
+
+	if (result['type']['value'] == 'hotel') {
+		listItem.addClass("hotelItem");
+	} else if (result['type']['value'] == 'venue') {
+		addButtonsToItem(listItem, result, false, true);
+		listItem.addClass("venueItem");
+	} else if (result['type']['value'] == 'activity') {
+		addButtonsToItem(listItem, result, false, true);
+		listItem.addClass("activityItem");
+	}
+
+	listItem.attr('id', result['id']['value']);
+	listItem.appendTo($('.timeline'));
 }
